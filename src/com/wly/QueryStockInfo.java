@@ -15,13 +15,13 @@ public class QueryStockInfo
     static public void main(String[] args)
     {
         LogUtils.Init("config/log4j.properties");
-        Timer timer = new Timer();
         if(args.length == 0)
         {
             Utils.Log("please input stock code");
             return;
         }
 
+        Timer timer = new Timer();
         QueryStockDetailInfo task = new QueryStockDetailInfo();
         task.code = args[0];
         timer.schedule(task, 0, 2000);

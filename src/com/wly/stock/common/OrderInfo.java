@@ -86,7 +86,10 @@ public class OrderInfo
         if (orderStat != newStat)
         {
             orderStat = newStat;
-            iOrderStatMonitor.OnNewStockStat(this);
+            if(iOrderStatMonitor != null)
+            {
+                iOrderStatMonitor.OnNewStockStat(this);
+            }
         }
     }
 

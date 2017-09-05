@@ -1,8 +1,5 @@
 package com.wly;
 
-import net.sourceforge.tess4j.ITesseract;
-import net.sourceforge.tess4j.Tesseract;
-
 import java.io.File;
 import java.util.Scanner;
 
@@ -18,9 +15,6 @@ public class TestVCode
 
     static public void main(String[] args)
     {
-        ITesseract instance;
-        instance = new Tesseract();
-//        instance.setDatapath(new File(datapath).getPath());
 
         Scanner in=new Scanner(System.in);
         System.out.println("needinput:");
@@ -30,8 +24,6 @@ public class TestVCode
         {
             File imageFile = new File(".", "test.png");
             String expResult = expOCRResult1;
-            String result = instance.doOCR(imageFile);
-            System.out.print("result: "+result);
         }
         catch (Exception ex)
         {

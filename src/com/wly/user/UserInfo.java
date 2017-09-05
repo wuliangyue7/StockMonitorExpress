@@ -8,6 +8,7 @@ import com.wly.stock.common.StockConst;
 import com.wly.stock.common.*;
 import com.wly.stock.tradeplat.eastmoney.TradeEastmoney;
 import com.wly.stock.tradeplat.eastmoney.TradeEastmoneyImpl;
+import com.wly.stock.tradeplat.simulate.TradeSimulate;
 import com.wly.stock.tradeplat.simulate.TradeSimulateImpl;
 import com.wly.stock.tradeplat.ITradeInterface;
 
@@ -29,31 +30,27 @@ public class UserInfo implements IAsyncCallBack, IStockOrderManager
     public String platPsw;
     public RmbAsset rmbAsset;
     public HashMap<String, StockAsset> stockAssetHashMap = new HashMap<>();
-//    public List<StrategyBase> policySteps = new ArrayList<>();
     private ArrayList<OrderInfo> orderInfos = new ArrayList<>();
 
+    private HashMap<Integer, ITradePlatform> tradePlatformHashMap = new HashMap<>();
     public ITradePlatform tradeInterface;
 
     public UserInfo()
     {
         rmbAsset = new RmbAsset();
         rmbAsset.code = StockConst.RmbCode;
-        rmbAsset.code = StockConst.RmbName;
+        rmbAsset.name = StockConst.RmbName;
+        tradePlatformHashMap.put(StockConst.PlatSimulate, new TradeSimulate(this));
+        tradePlatformHashMap.put(StockConst.PlatEastmoney, new TradeEastmoney(this));
+    }
+
+    public void AddEastmoneyToken(String tokenJson)
+    {
+
     }
 
     public void Init()
     {
-        switch (platId)
-        {
-            case StockConst.PlatEastmoney:
-                tradeInterface = new TradeEastmoney();
-//                tradeInterface = new TradeEastmoneyImpl();
-                break;
-            case StockConst.PlatSimulate:
-//                tradeInterface = new TradeSimulateImpl();
-                break;
-        }
-        tradeInterface.SetStockOrderManager(this);
         InitPolicySteps();
 //        Login(platAcct, platPsw);
     }
@@ -123,37 +120,25 @@ public class UserInfo implements IAsyncCallBack, IStockOrderManager
         orderInfos.add(orderInfo);
     }
 
-    private Timer timerQueryOrderStat;
-    public void StartQueryOrderStat()
+//    private Timer timerQueryOrderStat;
+//    public void StartQueryOrderStat()
+//    {
+//        timerQueryOrderStat = new Timer();
+//        timerQueryOrderStat.schedule(new UserTick(), 0, 1000);
+//    }
+//
+//    class UserTick extends TimerTask
+//    {
+//        @Override
+//        public void run()
+//        {
+//            tradeInterface.DoQueryOrderStat();
+//        }
+//    }
+
+    public void OnTick()
     {
-
-        boolean bNeedQuery = false;
-        int i, orderStat;
-        for(i=0; i<orderInfos.size(); ++i)
-        {
-            orderStat = orderInfos.get(i).GetOrderStat();
-            if(orderStat == OrderInfo.OrderStat_Half || orderStat==OrderInfo.OrderStat_Cancel_Failed
-                    || orderStat == OrderInfo.OrderStat_Order_Failed || orderStat == OrderInfo.OrderStat_Order_Succ)
-            {
-                bNeedQuery = true;
-                break;
-            }
-        }
-
-        if(bNeedQuery)
-        {
-            timerQueryOrderStat = new Timer();
-            timerQueryOrderStat.schedule(new QueryOrderInfo(), 0, 1000);
-        }
-    }
-
-    class QueryOrderInfo extends TimerTask
-    {
-        @Override
-        public void run()
-        {
-            tradeInterface.DoQueryOrderStat();
-        }
+        tradeInterface.DoQueryOrderStat();
     }
 
     @Override

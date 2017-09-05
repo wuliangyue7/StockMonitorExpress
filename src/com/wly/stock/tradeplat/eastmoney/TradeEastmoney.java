@@ -52,6 +52,13 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
         localContext.setCookieStore(new BasicCookieStore());
     }
 
+    public TradeEastmoney(IStockOrderManager stockOrderManager)
+    {
+        localContext = new HttpClientContext();
+        localContext.setCookieStore(new BasicCookieStore());
+        SetStockOrderManager(stockOrderManager);
+    }
+
     public void AddCookie(ArrayList<CookieItem> cookieList)
     {
         int i;

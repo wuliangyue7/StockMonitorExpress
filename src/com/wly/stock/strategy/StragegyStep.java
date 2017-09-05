@@ -9,7 +9,7 @@ import com.wly.user.UserInfo;
 /**
  * Created by wuly on 2017/8/26.
  */
-public class StragegyStep implements IOrderStatMonitor,IStockRuntimeInfoMonitor
+public class StragegyStep implements IStockRuntimeInfoMonitor
 {
     static public final int StragegyStepStatClose = 0;
     static public final int StragegyStepStatWaitInit = 1;
@@ -36,8 +36,7 @@ public class StragegyStep implements IOrderStatMonitor,IStockRuntimeInfoMonitor
     public UserInfo userInfo;
     public ITradePlatform iTradePlatform;
 
-    @Override
-    public void OnNewStockStat(OrderInfo orderInfo)
+    public void CheckOrderStat(OrderInfo orderInfo)
     {
         switch (orderInfo.GetOrderStat())
         {
@@ -117,6 +116,7 @@ public class StragegyStep implements IOrderStatMonitor,IStockRuntimeInfoMonitor
     {
         if (orderBuy != null)
         {
+            CheckOrderStat(orderBuy);
             return;
         }
         if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceInit, countInit))
@@ -142,6 +142,7 @@ public class StragegyStep implements IOrderStatMonitor,IStockRuntimeInfoMonitor
     {
         if(orderBuy != null)
         {
+            CheckOrderStat(orderBuy);
             return;
         }
 
@@ -155,6 +156,7 @@ public class StragegyStep implements IOrderStatMonitor,IStockRuntimeInfoMonitor
     {
         if(orderSell != null)
         {
+            CheckOrderStat(orderSell);
             return;
         }
 
@@ -208,7 +210,6 @@ public class StragegyStep implements IOrderStatMonitor,IStockRuntimeInfoMonitor
         orderInfo.date = Utils.GetDate();
         orderInfo.orderPrice = price;
         orderInfo.count = count;
-        orderInfo.iOrderStatMonitor = this;
         orderInfo.context = orderContext;
         return orderInfo;
     }

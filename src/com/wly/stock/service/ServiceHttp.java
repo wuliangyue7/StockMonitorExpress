@@ -13,32 +13,33 @@ public class ServiceHttp
 {
     public static void main(String[] args)
     {
-        RestExpress server = new RestExpress()
-                .setName("Echo");
-
-        server.uri("/echo", new Object()
-        {
-            @SuppressWarnings("unused")
-            public String read(Request req, Response res)
-            {
-                String value = req.getHeader("echo");
-                res.setContentType("text/xml");
-
-                if (value == null)
-                {
-                    return "<http_test><error>no value specified</error></http_test>";
-                }
-                else
-                {
-                    return String.format("<http_test><value>%s</value></http_test>", value);
-                }
-            }
-        })
-                .method(HttpMethod.GET)
-                .noSerialization();
-
-        server.bind(8000);
-        server.awaitShutdown();
+        new  ServiceHttp().Start();
+//        RestExpress server = new RestExpress()
+//                .setName("Echo");
+//
+//        server.uri("/echo", new Object()
+//        {
+//            @SuppressWarnings("unused")
+//            public String read(Request req, Response res)
+//            {
+//                String value = req.getHeader("echo");
+//                res.setContentType("text/xml");
+//
+//                if (value == null)
+//                {
+//                    return "<http_test><error>no value specified</error></http_test>";
+//                }
+//                else
+//                {
+//                    return String.format("<http_test><value>%s</value></http_test>", value);
+//                }
+//            }
+//        })
+//                .method(HttpMethod.GET)
+//                .noSerialization();
+//
+//        server.bind(8000);
+//        server.awaitShutdown();
 //
 //        ServiceHttp serviceHttp = new ServiceHttp();
 //        serviceHttp.Start();
@@ -48,8 +49,9 @@ public class ServiceHttp
     {
         RestExpress server = new RestExpress();
         server.setName("stock");
-        server.uri("/", new UserLoginControl());
-        server.setPort(8080);
+        server.uri("/test", new UserLoginControl()).method(HttpMethod.GET, HttpMethod.POST).noSerialization();
+//        server.setPort(8080);
+        server.bind(8080);
         server.awaitShutdown();
     }
 }

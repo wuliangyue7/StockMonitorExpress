@@ -245,6 +245,11 @@ public class TradeEastmoneyImpl implements ITradeInterface
     }
 
     @Override
+    public int DoQueryOrderStatus()
+    {
+        return 0;
+    }
+
     public int DoQueryOrderStatus(String platOrderId)
     {
         int orderStatus = OrderInfo.OrderStat_None;

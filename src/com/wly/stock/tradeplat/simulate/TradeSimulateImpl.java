@@ -68,6 +68,11 @@ public class TradeSimulateImpl implements ITradeInterface
     }
 
     @Override
+    public int DoQueryOrderStatus()
+    {
+        return 0;
+    }
+
     public int DoQueryOrderStatus(String platOrderId)
     {
         int ret = OrderInfo.OrderStat_None;
