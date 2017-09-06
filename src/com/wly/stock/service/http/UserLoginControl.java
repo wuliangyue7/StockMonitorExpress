@@ -1,8 +1,12 @@
 package com.wly.stock.service.http;
 
+import com.wly.UserInfoManager;
 import com.wly.database.DBOperator;
 import com.wly.database.DBPool;
+import com.wly.stock.common.StockConst;
+import com.wly.user.UserManager;
 import io.netty.handler.codec.http.HttpMethod;
+import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
 
@@ -18,10 +22,10 @@ public class UserLoginControl
     //for post
     public String create(Request req, Response res)
     {
-        Map<String, List<String>> params = req.getBodyFromUrlFormEncoded();
-      //  String userId = params.get("userId").get(0);
-
-        return "UserLoginControl create";
+        String ret = null;
+        String jsonStr = req.getBody().toString(ContentType.CHARSET);
+        ret = UserManager.GetInstance().AddUser(jsonStr);
+        return ret;
     }
 
     //for Get

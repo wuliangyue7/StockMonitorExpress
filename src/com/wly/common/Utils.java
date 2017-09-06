@@ -167,4 +167,9 @@ public class Utils
             ex.printStackTrace();
         }
     }
+
+    static public String FormatResult(int code, String msg)
+    {
+        return String.format("{\"code\":%d,\"msg\":\"%s\"}", code, msg);
+    }
 }
