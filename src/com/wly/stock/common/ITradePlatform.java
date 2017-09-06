@@ -1,14 +1,15 @@
 package com.wly.stock.common;
 
-import com.wly.user.UserInfo;
+import com.google.gson.JsonObject;
 
 /**
  * Created by wuly on 2017/8/26.
  */
 public interface ITradePlatform
 {
-    void SetContext(Object context);
-    void SetStockOrderManager(IStockOrderManager stockOrderManager);
+    void SetContext(JsonObject context);
+    boolean IsInit();
+    void SetStockOrderManager(ITradeManager stockOrderManager);
     void DoGetStockAsset();
     void DoGetRmbAsset();
     void DoOrderRequest(OrderInfo orderInfo);

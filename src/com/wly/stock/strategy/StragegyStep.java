@@ -9,7 +9,7 @@ import com.wly.user.UserInfo;
 /**
  * Created by wuly on 2017/8/26.
  */
-public class StragegyStep implements IStockRuntimeInfoMonitor
+public class StragegyStep
 {
     static public final int StragegyStepStatClose = 0;
     static public final int StragegyStepStatWaitInit = 1;
@@ -20,21 +20,28 @@ public class StragegyStep implements IStockRuntimeInfoMonitor
     public int stragegyStat;
     public float priceInit;
     public int countInit;
-    public int countStep;
+    public int countStepUnit;
     public float priceStepUint;
     public float buyOffset;
     public float sellOffset;
     public float priceMin;
     public float priceMax;
     public float priceLast; //上一次交易的参考价格
+    public String platOrderIdBuy;
+    public String platOrderIdSell;
 
     public Object orderContext;
 
     public OrderInfo orderBuy;
     public OrderInfo orderSell;
 
-    public UserInfo userInfo;
+    private UserInfo userInfo;
     public ITradePlatform iTradePlatform;
+
+    public StragegyStep(UserInfo userInfo)
+    {
+        this.userInfo = userInfo;
+    }
 
     public void CheckOrderStat(OrderInfo orderInfo)
     {
@@ -89,10 +96,14 @@ public class StragegyStep implements IStockRuntimeInfoMonitor
         }
     }
 
-    @Override
     public void OnTick()
     {
         if(stragegyStat == StragegyStepStatClose)
+        {
+            return;
+        }
+
+        if(!iTradePlatform.IsInit())
         {
             return;
         }
@@ -146,9 +157,9 @@ public class StragegyStep implements IStockRuntimeInfoMonitor
             return;
         }
 
-        if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceBuy, countStep))
+        if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceBuy, countStepUnit))
         {
-            TryDoBuyOrder(priceBuy, countStep);
+            TryDoBuyOrder(priceBuy, countStepUnit);
         }
     }
 
@@ -160,7 +171,7 @@ public class StragegyStep implements IStockRuntimeInfoMonitor
             return;
         }
 
-        TryDoSellOrder(priceSell, countStep);
+        TryDoSellOrder(priceSell, countStepUnit);
     }
 
     private void TryDoBuyOrder(float price, int count)

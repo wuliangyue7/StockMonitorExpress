@@ -71,26 +71,18 @@ public class OrderInfo
     public int count;
     public float orderPrice;    //订单价格
     public float dealPrice;     //成交价格
+    public int dealCount;      //成交数量
     public int platId;
     public String platOrderId;       //交易平台订单id
 
     private int orderStat = OrderStat_None;   //订单状态
     public String statMessage;  //状态消息
 
-    public IOrderStatMonitor iOrderStatMonitor;
-
     public Object context;
 
     public void SetOrderStat(int newStat)
     {
-        if (orderStat != newStat)
-        {
-            orderStat = newStat;
-            if(iOrderStatMonitor != null)
-            {
-                iOrderStatMonitor.OnNewStockStat(this);
-            }
-        }
+        this.orderStat = newStat;
     }
 
     public int GetOrderStat()

@@ -115,6 +115,15 @@ public class Utils
         return df.format(new Date());// new Date()为获取当前系统时间
     }
 
+    static public boolean IsNullOrEmpty(String str)
+    {
+        if(str == null || str.length() == 0)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     static public String GetDateTime()
     {

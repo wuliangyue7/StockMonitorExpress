@@ -9,7 +9,6 @@ import com.wly.network.http.HttpTask;
 import com.wly.network.http.IHttpRequestHandle;
 import com.wly.stock.StockContext;
 import com.wly.stock.common.*;
-import com.wly.stock.service.ServiceStockTrade;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -36,6 +35,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
     static public final int TaskQueryOrderStat  = 3;
     static public final int TaskCancelOrder     = 4;
 
+    private boolean isInited = false;
     public final String RootUrl = "https://jy.xzsec.com";
 
     private HttpClientContext localContext;
@@ -44,7 +44,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
     private float rmb = 0f;
     private HashMap<String, StockAsset> stockAssetHashMap = new HashMap<>();
 
-    private IStockOrderManager stockOrderManager;
+    private ITradeManager stockOrderManager;
 
     public TradeEastmoney()
     {
@@ -52,7 +52,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
         localContext.setCookieStore(new BasicCookieStore());
     }
 
-    public TradeEastmoney(IStockOrderManager stockOrderManager)
+    public TradeEastmoney(ITradeManager stockOrderManager)
     {
         localContext = new HttpClientContext();
         localContext.setCookieStore(new BasicCookieStore());
@@ -71,11 +71,6 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
     public void SetValidatekey(String validatekey)
     {
         this.validatekey = validatekey;
-    }
-
-    public void Init()
-    {
-
     }
 
     public float GetRmbAsset()
@@ -158,13 +153,42 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
     }
 
     @Override
-    public void SetContext(Object context)
+    public void SetContext(JsonObject context)
     {
-        this.localContext = (HttpClientContext)context;
+                /*Cookie:
+            Yybdm=5406;
+            Uid=aIHpfsTHkfQVEqR2GIBBjg%3d%3d;
+            Khmc=%e5%90%b4%e8%89%af%e8%82%b2;
+            mobileimei=34877cdc-e0bb-4a77-8ff8-b905c2657e3f;
+            Uuid=d30aa18dbad3489694c4e20eafe1dc51;
+            eastmoney_txzq_zjzh=NTQwNjAwMTY2MDcyfA%3D%3D
+        */
+
+//        this.localContext = (HttpClientContext)context;
+        this.localContext = new HttpClientContext();
+
+//                    if(platId == StockConst.PlatEastmoney)
+//                    {
+//                        JsonObject jsonCookie = jsonObject.get("cookie").getAsJsonObject();
+//                        jsonObject.entrySet();
+//                        Iterator<Map.Entry<String, JsonElement>> iterator = jsonObject.entrySet().iterator();
+//                        Map.Entry<String, JsonElement> entry;
+//                        while(iterator.hasNext()){
+//                            entry = iterator.next();
+//
+//                        }
+//                    }
+        isInited = true;
     }
 
     @Override
-    public void SetStockOrderManager(IStockOrderManager stockOrderManager)
+    public boolean IsInit()
+    {
+        return isInited;
+    }
+
+    @Override
+    public void SetStockOrderManager(ITradeManager stockOrderManager)
     {
         this.stockOrderManager = stockOrderManager;
     }
@@ -328,15 +352,28 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform
         int i;
         JsonObject newOrderInfo;
         int orderStat;
-        String eastMoneyId;
+        String tradeFlag;
+        OrderInfo orderInfo;
+        ArrayList<OrderInfo> orderInfos = new ArrayList<>();
         for (i = 0; i < jsonDataArray.size(); ++i)
         {
             newOrderInfo = jsonDataArray.get(i).getAsJsonObject();
-            eastMoneyId = newOrderInfo.get("Wtbh").getAsString();
-            orderStat = EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString());
-            stockOrderManager.SetOrderStat(eastMoneyId, orderStat);
-//            ServiceStockTrade.GetInstance().OnStockStat(eastMoneyId, orderStat);
+            orderInfo = new OrderInfo();
+            orderInfo.platId = StockConst.PlatEastmoney;
+            orderInfo.code = newOrderInfo.get("Zqdm").getAsString();
+            orderInfo.name = newOrderInfo.get("Zqmc").getAsString();
+            orderInfo.orderPrice = newOrderInfo.get("Wtjg").getAsFloat();
+            orderInfo.count = newOrderInfo.get("Wtsl").getAsInt();
+            orderInfo.platOrderId = newOrderInfo.get("Wtbh").getAsString();
+            orderInfo.dealPrice = newOrderInfo.get("Cjjg").getAsFloat();
+            orderInfo.dealCount = newOrderInfo.get("Cjsl").getAsInt();
+            tradeFlag = newOrderInfo.get("Mmlb").getAsString();
+            orderInfo.tradeFlag = tradeFlag.equals("B")?StockConst.TradeBuy:StockConst.TradeSell;
+            orderInfo.date = newOrderInfo.get("Wtrq").getAsString();
+            orderInfo.SetOrderStat(EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString()));
+            orderInfos.add(orderInfo);
         }
+        stockOrderManager.RrefreshOrderList(orderInfos);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.wly.stock.tradeplat.simulate;
 
-import com.wly.stock.common.IStockOrderManager;
+import com.google.gson.JsonObject;
+import com.wly.stock.common.ITradeManager;
 import com.wly.stock.common.ITradePlatform;
 import com.wly.stock.common.OrderInfo;
 
@@ -9,24 +10,29 @@ import com.wly.stock.common.OrderInfo;
  */
 public class TradeSimulate implements ITradePlatform
 {
-
     public TradeSimulate()
     {
     }
 
-    public TradeSimulate(IStockOrderManager stockOrderManager)
+    public TradeSimulate(ITradeManager stockOrderManager)
     {
         SetStockOrderManager(stockOrderManager);
     }
 
     @Override
-    public void SetContext(Object context)
+    public void SetContext(JsonObject context)
     {
 
     }
 
     @Override
-    public void SetStockOrderManager(IStockOrderManager stockOrderManager)
+    public boolean IsInit()
+    {
+        return false;
+    }
+
+    @Override
+    public void SetStockOrderManager(ITradeManager stockOrderManager)
     {
 
     }

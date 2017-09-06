@@ -38,34 +38,26 @@ public class UserManager
 
     public String AddUser(String jsonStr)
     {
-        /*Cookie:
-            Yybdm=5406;
-            Uid=aIHpfsTHkfQVEqR2GIBBjg%3d%3d;
-            Khmc=%e5%90%b4%e8%89%af%e8%82%b2;
-            mobileimei=34877cdc-e0bb-4a77-8ff8-b905c2657e3f;
-            Uuid=d30aa18dbad3489694c4e20eafe1dc51;
-            eastmoney_txzq_zjzh=NTQwNjAwMTY2MDcyfA%3D%3D
-        */
-
         int code = 0;
         String msg = "succ";
         try
         {
             JsonObject jsonObject = new JsonParser().parse(jsonStr).getAsJsonObject();
-
             int userId = jsonObject.get("userId").getAsInt();
-            int platId = jsonObject.get("platId").getAsInt();
-            if(platId == StockConst.PlatEastmoney)
-            {
-                JsonObject jsonCookie = jsonObject.get("cookie").getAsJsonObject();
-                jsonObject.entrySet();
-                Iterator<Map.Entry<String, JsonElement>> iterator = jsonObject.entrySet().iterator();
-                Map.Entry<String, JsonElement> entry;
-                while(iterator.hasNext()){
-                    entry = iterator.next();
 
-                }
+            UserInfo userInfo = null;
+            if(userInfoHashMap.containsKey(userId))
+            {
+                userInfo = userInfoHashMap.get(userId);
             }
+            else
+            {
+                userInfo = new UserInfo();
+                userInfo.Init(userId);
+            }
+
+            int platId = jsonObject.get("platId").getAsInt();
+            userInfo.InitTradeContext(platId, jsonObject.get("cookie").getAsJsonObject());
         }
         catch (JsonSyntaxException ex)
         {
@@ -80,13 +72,13 @@ public class UserManager
 
     public void AddUser(UserInfo userInfo)
     {
-        if(userInfoHashMap.containsKey(userInfo.id))
+        if(userInfoHashMap.containsKey(userInfo.GetUserId()))
         {
             LogUtils.LogRealtime("user has alread in usermanager");
             return;
         }
         lockUserInfoHashMap.lock();
-        userInfoHashMap.put(userInfo.id, userInfo);
+        userInfoHashMap.put(userInfo.GetUserId(), userInfo);
         lockUserInfoHashMap.unlock();
     }
 

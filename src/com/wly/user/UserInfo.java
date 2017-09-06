@@ -1,39 +1,40 @@
 package com.wly.user;
 
+import com.google.gson.JsonObject;
 import com.wly.common.IAsyncCallBack;
+import com.wly.common.ITickable;
 import com.wly.common.LogUtils;
+import com.wly.common.Utils;
 import com.wly.database.DBPool;
 import com.wly.database.DBQuery;
+import com.wly.stock.StockMarketInfoManager;
 import com.wly.stock.common.StockConst;
 import com.wly.stock.common.*;
+import com.wly.stock.strategy.StragegyStep;
 import com.wly.stock.tradeplat.eastmoney.TradeEastmoney;
-import com.wly.stock.tradeplat.eastmoney.TradeEastmoneyImpl;
 import com.wly.stock.tradeplat.simulate.TradeSimulate;
-import com.wly.stock.tradeplat.simulate.TradeSimulateImpl;
-import com.wly.stock.tradeplat.ITradeInterface;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Administrator on 2017/2/8.
  */
-public class UserInfo implements IAsyncCallBack, IStockOrderManager
+public class UserInfo implements IAsyncCallBack, ITradeManager, ITickable
 {
-    public int id;
+    private int id;
     public String name;
-    public int platId;
-    public String platAcct;
-    public String platPsw;
     public RmbAsset rmbAsset;
     public HashMap<String, StockAsset> stockAssetHashMap = new HashMap<>();
     private ArrayList<OrderInfo> orderInfos = new ArrayList<>();
+    private Lock lockOrderList = new ReentrantLock();
 
     private HashMap<Integer, ITradePlatform> tradePlatformHashMap = new HashMap<>();
     public ITradePlatform tradeInterface;
+    private ArrayList<StragegyStep> stragegySteps = new ArrayList<>();
 
     public UserInfo()
     {
@@ -44,66 +45,65 @@ public class UserInfo implements IAsyncCallBack, IStockOrderManager
         tradePlatformHashMap.put(StockConst.PlatEastmoney, new TradeEastmoney(this));
     }
 
-    public void AddEastmoneyToken(String tokenJson)
+    public void Init(int id)
     {
-
-    }
-
-    public void Init()
-    {
+        this.id = id;
         InitPolicySteps();
 //        Login(platAcct, platPsw);
+    }
+
+    public void InitTradeContext(int platId, JsonObject context)
+    {
+        ITradePlatform tradePlatform = tradePlatformHashMap.get(platId);
+        if(tradePlatform != null)
+        {
+            tradePlatform.SetContext(context);
+        }
+    }
+
+    public int GetUserId()
+    {
+        return id;
     }
 
     private boolean InitPolicySteps()
     {
         try {
-//            StrategyStepAll policy;
             DBPool dbPool = DBPool.GetInstance();
             DBQuery dbQuery = dbPool.ExecuteQuerySync(String.format("select * from policy_step where user_id=%d", id));
             ResultSet rs = dbQuery.resultSet;
+            StragegyStep stragegyStep;
             while (rs.next())
             {
-//                policy = new StrategyStepAll(this);
-//                policy.id = rs.getInt("id");
-//                policy.code = rs.getString("code");
-//                policy.priceInit = rs.getFloat("price_init");
-//                policy.initCount = rs.getInt("count_init");
-//                policy.priceUnit = rs.getFloat("price_unit");
-//                policy.stepUnit = rs.getInt("step_unit");
-//                policy.buyOffset = rs.getFloat("buy_offset");
-//                policy.sellOffset = rs.getFloat("sell_offset");
-//                policy.minPrice = rs.getFloat("min_price");
-//                policy.maxPrice = rs.getFloat("max_price");
-//                policy.policyStat = rs.getInt("policy_stat");
-//                policy.priceLast = rs.getFloat("price_last");
-//                policy.buyOrderId = rs.getString("buyorder_id");
-//                policy.buyLastPrice = rs.getFloat("buylast_price");
-//                policy.sellOrderId = rs.getString("sellOrder_id");
-//                policy.sellLastPrice = rs.getFloat("selllast_price");
-//
-//                if(!policy.sellOrderId.equals("0") && !rs.getString("sellorder_date").equals(Utils.GetDate()))
-//                {
-//                    policy.sellOrderId = "0";
-//                    policy.sellLastPrice = 0f;
-//                }
-//
-//                if(!policy.buyOrderId.equals("0") && !rs.getString("buyorder_date").equals(Utils.GetDate()))
-//                {
-//                    policy.buyOrderId = "0";
-//                    policy.buyLastPrice = 0f;
-//                }
-//
-//                if(policy.policyStat == StrategyStepAll.PolicyStat_None)
-//                {
-//                    LogUtils.LogRealtime("strategy is stop "+id);
-//                    continue;
-//                }
-//
-//                policySteps.add(policy);
+                stragegyStep = new StragegyStep(this);
+                stragegyStep.id = rs.getInt("id");
+                stragegyStep.code = rs.getString("code");
+                stragegyStep.priceInit = rs.getFloat("price_init");
+                stragegyStep.countInit = rs.getInt("count_init");
+                stragegyStep.priceStepUint = rs.getFloat("price_unit");
+                stragegyStep.countStepUnit = rs.getInt("step_unit");
+                stragegyStep.buyOffset = rs.getFloat("buy_offset");
+                stragegyStep.sellOffset = rs.getFloat("sell_offset");
+                stragegyStep.priceMin = rs.getFloat("min_price");
+                stragegyStep.priceMax = rs.getFloat("max_price");
+                stragegyStep.stragegyStat = rs.getInt("policy_stat");
+                stragegyStep.priceLast = rs.getFloat("price_last");
+                stragegyStep.platOrderIdBuy = rs.getString("buyorder_id");
+                stragegyStep.platOrderIdSell = rs.getString("sellOrder_id");
 
-//                StockMarketInfoManager.GetInstance().AddMonitorCode(policy.code);
-                //StockPriceMonitorManager.GetInstance().AddMonitor(policy);
+                if(!rs.getString("buyorder_date").equals(Utils.GetDate()))
+                {
+                    stragegyStep.platOrderIdBuy = null;
+                }
+
+                if(!rs.getString("sellorder_date").equals(Utils.GetDate()))
+                {
+                    stragegyStep.platOrderIdSell = null;
+                }
+
+                stragegySteps.add(stragegyStep);
+
+                StockMarketInfoManager.GetInstance().AddMonitorCode(stragegyStep.code);
             }
             dbQuery.Close();
             return true;
@@ -120,41 +120,42 @@ public class UserInfo implements IAsyncCallBack, IStockOrderManager
         orderInfos.add(orderInfo);
     }
 
-//    private Timer timerQueryOrderStat;
-//    public void StartQueryOrderStat()
-//    {
-//        timerQueryOrderStat = new Timer();
-//        timerQueryOrderStat.schedule(new UserTick(), 0, 1000);
-//    }
-//
-//    class UserTick extends TimerTask
-//    {
-//        @Override
-//        public void run()
-//        {
-//            tradeInterface.DoQueryOrderStat();
-//        }
-//    }
-
+    @Override
     public void OnTick()
     {
         tradeInterface.DoQueryOrderStat();
+        lockOrderList.lock();
+        int i;
+        for(i=0; i<stragegySteps.size(); ++i)
+        {
+            stragegySteps.get(i).OnTick();
+        }
+        lockOrderList.unlock();
     }
 
     @Override
-    public void SetOrderStat(String platOrderId, int stat)
+    public void RrefreshOrderList(ArrayList<OrderInfo> orderInfos)
+    {
+        lockOrderList.lock();
+        this.orderInfos = orderInfos;
+        lockOrderList.unlock();
+    }
+
+    public  int GetOrderStat(int platId, String platOrderId)
     {
         int i;
+        int stat = OrderInfo.OrderStat_None;
         OrderInfo orderInfo;
         for(i=0; i<orderInfos.size(); ++i)
         {
             orderInfo = orderInfos.get(i);
-            if(orderInfo.platOrderId == platOrderId)
+            if(orderInfo.platOrderId == platOrderId && orderInfo.platId == platId)
             {
-                orderInfo.SetOrderStat(stat);
+                stat = orderInfo.GetOrderStat();
                 break;
             }
         }
+        return stat;
     }
 
     public StockAsset GetStockAsset(String code)

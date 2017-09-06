@@ -1,7 +1,5 @@
 package com.wly.stock.service;
 
-import com.wly.stock.common.IStockRuntimeInfoMonitor;
-
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
