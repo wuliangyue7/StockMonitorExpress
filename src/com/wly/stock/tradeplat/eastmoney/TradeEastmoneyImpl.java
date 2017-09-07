@@ -114,6 +114,21 @@ public class TradeEastmoneyImpl implements ITradeInterface
             validatekey = pageContent.substring(startIdex, startIdex+36);
             System.out.println("validatekey: "+validatekey);
 
+//            List<Cookie> cookieList = localContext.getCookieStore().getCookies();
+//            for(Cookie cookieTmp1:cookieList)
+//            {
+//                System.out.println("name: "+cookieTmp1.getName());
+//                System.out.println("    version: "+cookieTmp1.getVersion());
+//                System.out.println("    name: "+cookieTmp1.getName());
+//                System.out.println("    value: "+cookieTmp1.getValue());
+//                System.out.println("    domain: "+cookieTmp1.getDomain());
+//                System.out.println("    path: "+cookieTmp1.getPath());
+//                System.out.println("    expirydate: "+cookieTmp1.getExpiryDate());
+//                System.out.println("    Comment: "+cookieTmp1.getComment());
+//                System.out.println("    CommentURL: "+cookieTmp1.getCommentURL());
+//                System.out.println("    ports: "+cookieTmp1.getPorts());
+//            }
+
             //userInfo.DoTrade("603960", StockConst.TradeSell, 55.7f, 500);
 //            StockUtils.DoTradeSell(0, "603960", 55.7f, 500);
             //for test

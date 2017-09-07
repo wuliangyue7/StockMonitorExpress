@@ -18,10 +18,12 @@ import com.wly.stock.strategy.StragegyStep;
 import com.wly.user.RmbAsset;
 import com.wly.user.UserInfo;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -59,20 +61,6 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         this.userInfo = userInfo;
         localContext = new HttpClientContext();
         localContext.setCookieStore(new BasicCookieStore());
-    }
-
-    public void AddCookie(ArrayList<CookieItem> cookieList)
-    {
-        int i;
-        for (i = 0; i < cookieList.size(); ++i)
-        {
-            localContext.getCookieStore().addCookie(cookieList.get(i).GetCookie());
-        }
-    }
-
-    public void SetValidatekey(String validatekey)
-    {
-        this.validatekey = validatekey;
     }
 
     public RmbAsset GetRmbAsset()
@@ -173,29 +161,21 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     @Override
     public void SetContext(JsonObject context)
     {
-                /*Cookie:
-            Yybdm=5406;
-            Uid=aIHpfsTHkfQVEqR2GIBBjg%3d%3d;
-            Khmc=%e5%90%b4%e8%89%af%e8%82%b2;
-            mobileimei=34877cdc-e0bb-4a77-8ff8-b905c2657e3f;
-            Uuid=d30aa18dbad3489694c4e20eafe1dc51;
-            eastmoney_txzq_zjzh=NTQwNjAwMTY2MDcyfA%3D%3D
-        */
+        this.validatekey = context.get("validatekey").getAsString();
+        int i;
+        JsonArray jsonArray = context.get("cookies").getAsJsonArray();
+        Cookie cookie;
+        CookieStore cookieStore = localContext.getCookieStore();
+        for(i=0; i<jsonArray.size(); ++i)
+        {
+            cookie = Utils.ParserJson2Cookie(jsonArray.get(i).getAsJsonObject());
+            if(cookie != null)
+            {
+                LogUtils.LogRealtime("Add Cookie: "+cookie.getName()+" "+cookie.getValue());
+                cookieStore.addCookie(cookie);
+            }
+        }
 
-//        this.localContext = (HttpClientContext)context;
-        this.localContext = new HttpClientContext();
-
-//                    if(platId == StockConst.PlatEastmoney)
-//                    {
-//                        JsonObject jsonCookie = jsonObject.get("cookie").getAsJsonObject();
-//                        jsonObject.entrySet();
-//                        Iterator<Map.Entry<String, JsonElement>> iterator = jsonObject.entrySet().iterator();
-//                        Map.Entry<String, JsonElement> entry;
-//                        while(iterator.hasNext()){
-//                            entry = iterator.next();
-//
-//                        }
-//                    }
         isInited = true;
     }
 
