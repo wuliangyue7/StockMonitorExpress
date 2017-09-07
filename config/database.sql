@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50716
 File Encoding         : 65001
 
-Date: 2017-09-07 15:39:05
+Date: 2017-09-07 17:54:29
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -42,7 +42,7 @@ DROP TABLE IF EXISTS `policy_step`;
 CREATE TABLE `policy_step` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `code` char(6) NOT NULL,
+  `code` char(10) NOT NULL,
   `policy_stat` int(11) NOT NULL COMMENT '0-未开启\r\n1-待初始化\r\n2-区间执行\r\n3-已完成',
   `price_last` float NOT NULL,
   `price_init` float NOT NULL,
