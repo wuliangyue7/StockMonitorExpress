@@ -51,6 +51,7 @@ public class StockContext extends TimerTask
     public void SetUserManger(UserManager userManager)
     {
         this.userManager = userManager;
+        AddTickObject(this.userManager);
     }
 
     public UserManager GetUserManager()

@@ -20,7 +20,7 @@ public class ServiceHttp
     {
         RestExpress server = new RestExpress();
         server.setName("stock");
-        server.uri("/test", new UserLoginControl()).method(HttpMethod.GET, HttpMethod.POST).noSerialization();
+        server.uri("/userlogin", new UserLoginControl()).method(HttpMethod.GET, HttpMethod.POST).noSerialization();
 //        server.setPort(8080);
         server.bind(8080);
         server.awaitShutdown();

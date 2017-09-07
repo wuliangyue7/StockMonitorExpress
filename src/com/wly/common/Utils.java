@@ -199,7 +199,7 @@ public class Utils
         jsonObject.addProperty("path", cookie.getPath());
         if(cookie.getExpiryDate() != null)
         {
-            jsonObject.addProperty("expiryDate", cookie.getExpiryDate());
+            jsonObject.addProperty("expiryDate", cookie.getExpiryDate().toString());
         }
 
         return jsonObject;
@@ -208,10 +208,10 @@ public class Utils
     static public Cookie ParserJson2Cookie(JsonObject jsonObject)
     {
         BasicClientCookie cookie = null;
-        if(!jsonObject.has("name") || jsonObject.has("value"))
-        {
-            return cookie;
-        }
+//        if(!jsonObject.has("name") || jsonObject.has("value"))
+//        {
+//            return cookie;
+//        }
 
         cookie = new BasicClientCookie(jsonObject.get("name").getAsString(), jsonObject.get("value").getAsString());
         if(jsonObject.has("domain"))

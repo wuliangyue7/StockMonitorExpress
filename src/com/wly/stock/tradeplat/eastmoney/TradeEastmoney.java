@@ -71,6 +71,10 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     @Override
     public StockAsset GetStockAsset(String code)
     {
+        if(stockAssetHashMap == null)
+        {
+            return  null;
+        }
         return stockAssetHashMap.get(code);
     }
 
@@ -156,6 +160,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             rmbAsset = new RmbAsset();
         }
         rmbAsset.activeAmount = jsonDataArray.get(0).getAsJsonObject().get("Kyzj").getAsFloat();
+        LogUtils.LogRealtime("activeAmount RMB: "+rmbAsset.activeAmount);
     }
 
     @Override
@@ -246,6 +251,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
                 stockAsset.amountTotal = newOrderInfo.get("Zqsl").getAsInt();
                 stockAsset.amountActive = newOrderInfo.get("Kysl").getAsInt();
                 stockAssetHashMap.put(stockAsset.code, stockAsset);
+                LogUtils.LogRealtime(stockAsset.code+" "+stockAsset.amountTotal+" " + stockAsset.amountActive);
             }
         } catch (Exception ex)
         {

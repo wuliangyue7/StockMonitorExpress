@@ -173,7 +173,10 @@ public class OrderInfo
         int orderStat = OrderInfo.OrderStat_None;
         try {
             ResultSet rs = dbQuery.resultSet;
-            orderStat = rs.getInt("order_stat");
+            if(rs.next())
+            {
+                orderStat = rs.getInt("order_stat");
+            }
             dbQuery.Close();
         } catch (Exception ex) {
             LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());

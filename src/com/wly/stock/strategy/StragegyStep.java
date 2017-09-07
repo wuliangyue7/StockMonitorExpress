@@ -1,5 +1,6 @@
 package com.wly.stock.strategy;
 
+import com.wly.common.LogUtils;
 import com.wly.common.Utils;
 import com.wly.database.DBPool;
 import com.wly.stock.StockContext;
@@ -50,6 +51,11 @@ public class StragegyStep
         }
 
         StockRuntimeInfo stockRuntimeInfo = StockContext.GetInstance().GetServiceStockRuntimeInfo().GetStockRuntimeInfoByCode(code);
+        if(stockRuntimeInfo == null)
+        {
+            return;
+        }
+
         switch (stragegyStat)
         {
             case StragegyStepStatWaitInit:
@@ -88,6 +94,9 @@ public class StragegyStep
         float priceBuy, priceSell;
         priceBuy = priceLast- priceStepUint + buyOffset;
         priceSell = priceLast+ priceStepUint + sellOffset;
+
+        LogUtils.LogRealtime(String.format("ProcessNormal: %d code=%s %s priceNow=%.2f priceBuy=%.2f priceSell=%.2f", id,
+                code, stockRuntimeInfo.name, stockRuntimeInfo.priceNew, priceBuy, priceSell));
         if(priceBuy >= priceMin)
         {
             ProcessBuy(stockRuntimeInfo, priceBuy);
@@ -132,6 +141,7 @@ public class StragegyStep
             }
 
             SetPriceLast(priceLast+priceStepUint);
+            SetOrderIdSell(0);
             if(orderIdBuy != 0)
             {
                 OrderInfo.UpdateOrderStat(orderIdBuy, OrderInfo.OrderStat_Cancel_Ready);
@@ -150,7 +160,7 @@ public class StragegyStep
         RmbAsset rmbAsset = userInfo.GetRmbAsset(platId);
         if(rmbAsset!= null && cost <= rmbAsset.activeAmount)
         {
-            orderIdBuy = CreateOrder(StockConst.TradeBuy, price, count);
+            SetOrderIdBuy(CreateOrder(StockConst.TradeBuy, price, count));
         }
     }
 
@@ -248,6 +258,18 @@ public class StragegyStep
     {
         final String sqlFormat = "update policy_step set sellorder_id = %d where id = %d";
         String sqlStr = String.format(sqlFormat, orderId, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
+    }
+
+    static public void SaveToDB(StragegyStep stragegyStep)
+    {
+        final String SqlFormat = "insert into policy_step (id, user_id, code, policy_stat, price_last, " +
+                "price_init, count_init, price_unit, step_unit, buy_offset, sell_offset, min_price, max_price)" +
+                "values(%d, %d, '%s', %d, %.2f,  %.2f, %d, %.2f, %d, %.2f, %.2f, %.2f, %.2f)";
+        String sqlStr = String.format(SqlFormat, stragegyStep.id, stragegyStep.userId, stragegyStep.code, stragegyStep.stragegyStat,
+                stragegyStep.priceLast, stragegyStep.priceInit, stragegyStep.countInit, stragegyStep.priceStepUint,
+                stragegyStep.countStepUnit, stragegyStep.buyOffset, stragegyStep.sellOffset, stragegyStep.priceMin,
+                stragegyStep.priceMax);
         DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
     }
 }

@@ -93,7 +93,7 @@ public class    ServiceStockRuntimeInfo extends TimerTask
     public void run()
     {
         lockQueryInfo.lock();
-        Set<String> querySet = hmStockRuntimeInfo.keySet();
+        Set<String> querySet = hmQueryCode.keySet();
         lockQueryInfo.unlock();
 
         try

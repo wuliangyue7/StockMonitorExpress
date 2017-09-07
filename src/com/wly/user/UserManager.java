@@ -43,10 +43,11 @@ public class UserManager implements ITickable
             else
             {
                 userInfo = new UserInfo(userId);
+                userInfoHashMap.put(userId, userInfo);
             }
 
             int platId = jsonObject.get("platId").getAsInt();
-            userInfo.InitTradeContext(platId, jsonObject.get("cookie").getAsJsonObject());
+            userInfo.InitTradeContext(platId, jsonObject);
         }
         catch (JsonSyntaxException ex)
         {

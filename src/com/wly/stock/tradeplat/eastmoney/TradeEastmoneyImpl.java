@@ -16,6 +16,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -114,21 +115,27 @@ public class TradeEastmoneyImpl implements ITradeInterface
             validatekey = pageContent.substring(startIdex, startIdex+36);
             System.out.println("validatekey: "+validatekey);
 
-//            List<Cookie> cookieList = localContext.getCookieStore().getCookies();
-//            for(Cookie cookieTmp1:cookieList)
-//            {
-//                System.out.println("name: "+cookieTmp1.getName());
-//                System.out.println("    version: "+cookieTmp1.getVersion());
-//                System.out.println("    name: "+cookieTmp1.getName());
-//                System.out.println("    value: "+cookieTmp1.getValue());
-//                System.out.println("    domain: "+cookieTmp1.getDomain());
-//                System.out.println("    path: "+cookieTmp1.getPath());
-//                System.out.println("    expirydate: "+cookieTmp1.getExpiryDate());
-//                System.out.println("    Comment: "+cookieTmp1.getComment());
-//                System.out.println("    CommentURL: "+cookieTmp1.getCommentURL());
-//                System.out.println("    ports: "+cookieTmp1.getPorts());
-//            }
 
+            List<Cookie> cookieList = localContext.getCookieStore().getCookies();
+            JsonObject jsonObject1 = new JsonObject();
+            JsonArray jsonArray = new JsonArray();
+            for(Cookie cookieTmp1:cookieList)
+            {
+                jsonArray.add(Utils.ParserCookie2Json(cookieTmp1));
+            }
+
+            jsonObject1.addProperty("userId", 1);
+            jsonObject1.addProperty("platId", StockConst.PlatEastmoney);
+            jsonObject1.add("cookies", jsonArray);
+            jsonObject1.addProperty("validatekey", validatekey);
+
+            HttpPost httpPostTestLoginToken = new HttpPost("http://127.0.0.1:8080/userlogin");
+            httpPostTestLoginToken.setEntity(new StringEntity(jsonObject1.toString(), "utf-8"));
+            CloseableHttpClient httpclientTest = HttpClients.createDefault();
+            CloseableHttpResponse responseTest = httpclientTest.execute(httpPostTestLoginToken);
+            String retStrTest = Utils.GetResponseContent(responseTest);
+            System.out.println("retStrTest:");
+            System.out.println(retStrTest);
             //userInfo.DoTrade("603960", StockConst.TradeSell, 55.7f, 500);
 //            StockUtils.DoTradeSell(0, "603960", 55.7f, 500);
             //for test

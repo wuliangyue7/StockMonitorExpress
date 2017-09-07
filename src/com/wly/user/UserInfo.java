@@ -7,6 +7,7 @@ import com.wly.common.LogUtils;
 import com.wly.common.Utils;
 import com.wly.database.DBPool;
 import com.wly.database.DBQuery;
+import com.wly.stock.StockContext;
 import com.wly.stock.StockMarketInfoManager;
 import com.wly.stock.common.StockConst;
 import com.wly.stock.common.*;
@@ -86,7 +87,8 @@ public class UserInfo implements IAsyncCallBack, ITickable
                 stragegyStep.orderIdBuy = rs.getInt("buyorder_id");
                 stragegyStep.orderIdSell = rs.getInt("sellorder_id");
                 stragegySteps.add(stragegyStep);
-                StockMarketInfoManager.GetInstance().AddMonitorCode(stragegyStep.code);
+                StockContext.GetInstance().GetServiceStockRuntimeInfo().AddQueryCode(stragegyStep.code);
+//                StockMarketInfoManager.GetInstance().AddMonitorCode(stragegyStep.code);
             }
             dbQuery.Close();
             return true;
