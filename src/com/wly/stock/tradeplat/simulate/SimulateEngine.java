@@ -46,7 +46,7 @@ public class SimulateEngine extends TimerTask
                 orderInfo.tradeFlag = rs.getInt("trade_flag");
                 orderInfo.orderPrice = rs.getFloat("order_price");
                 orderInfo.dealPrice = rs.getFloat("deal_price");
-                orderInfo.count = rs.getInt("count");
+                orderInfo.orderCount = rs.getInt("orderCount");
                 orderInfo.SetOrderStat(rs.getInt("stat"));
 
                 orderInfos.add(orderInfo);
@@ -69,7 +69,7 @@ public class SimulateEngine extends TimerTask
     {
         boolean needUpdate = false;
         StockRuntimeInfo stockMarketInfo = StockMarketInfoManager.GetInstance().GetStockMarketInfoByCode(orderInfo.code);
-        if(stockMarketInfo != null && stockMarketInfo.TestDeal(orderInfo.tradeFlag, orderInfo.orderPrice, orderInfo.count))
+        if(stockMarketInfo != null && stockMarketInfo.TestDeal(orderInfo.tradeFlag, orderInfo.orderPrice, orderInfo.orderCount))
         {
             needUpdate =true;
             orderInfo.dealPrice = orderInfo.orderPrice;

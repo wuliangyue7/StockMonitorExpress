@@ -181,7 +181,7 @@ public class TradeEastmoneyImpl implements ITradeInterface
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("stockCode", orderInfo.code));
             params.add(new BasicNameValuePair("price", String.format("%.2f",orderInfo.orderPrice)));
-            params.add(new BasicNameValuePair("amount", Integer.toString(orderInfo.count)));
+            params.add(new BasicNameValuePair("amount", Integer.toString(orderInfo.orderCount)));
             params.add(new BasicNameValuePair("tradeType", orderInfo.tradeFlag== StockConst.TradeBuy?"B":"S"));
             params.add(new BasicNameValuePair("zqmc", orderInfo.name));
             httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));

@@ -52,8 +52,7 @@ public class UserManager
             }
             else
             {
-                userInfo = new UserInfo();
-                userInfo.Init(userId);
+                userInfo = new UserInfo(userId);
             }
 
             int platId = jsonObject.get("platId").getAsInt();

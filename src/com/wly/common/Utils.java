@@ -109,6 +109,11 @@ public class Utils
         return GetDate("yyyyMMdd");// new Date()为获取当前系统时间
     }
 
+    static public String GetDataTime()
+    {
+        return GetDate("yyyyMMdd-HHmmss");// new Date()为获取当前系统时间
+    }
+
     static public String GetDate(String format)
     {
         SimpleDateFormat df = new SimpleDateFormat(format);//设置日期格式

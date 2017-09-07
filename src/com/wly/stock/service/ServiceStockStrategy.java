@@ -9,24 +9,24 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ServiceStockStrategy
 {
-    private ArrayList<IStockRuntimeInfoMonitor> stockStrategies = new ArrayList<>();
-    private Lock lockStockStrategies = new ReentrantLock();
+//    private ArrayList<IStockRuntimeInfoMonitor> stockStrategies = new ArrayList<>();
+//    private Lock lockStockStrategies = new ReentrantLock();
 
-    public void AddStrategy(IStockRuntimeInfoMonitor stockStrategy)
-    {
-        lockStockStrategies.lock();
-        stockStrategies.add(stockStrategy);
-        lockStockStrategies.unlock();
-    }
+//    public void AddStrategy(IStockRuntimeInfoMonitor stockStrategy)
+//    {
+//        lockStockStrategies.lock();
+//        stockStrategies.add(stockStrategy);
+//        lockStockStrategies.unlock();
+//    }
 
-    public void OnTick()
-    {
-        lockStockStrategies.lock();
-        int i;
-        for(i=0; i<stockStrategies.size(); ++i)
-        {
-            stockStrategies.get(i).OnTick();
-        }
-        lockStockStrategies.unlock();
-    }
+//    public void OnTick()
+//    {
+//        lockStockStrategies.lock();
+//        int i;
+//        for(i=0; i<stockStrategies.size(); ++i)
+//        {
+//            stockStrategies.get(i).OnTick();
+//        }
+//        lockStockStrategies.unlock();
+//    }
 }

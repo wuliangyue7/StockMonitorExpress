@@ -1,5 +1,11 @@
 package com.wly.stock.common;
 
+import com.wly.common.LogUtils;
+import com.wly.database.DBPool;
+import com.wly.database.DBQuery;
+
+import java.sql.ResultSet;
+
 /**
  * Created by Administrator on 2017/2/9.
  */
@@ -13,10 +19,11 @@ public class OrderInfo
     static public final int OrderStat_Query_Waiting = 5; //订单状态查询中
     static public final int OrderStat_Deal = 6;  //已成交
     static public final int OrderStat_Half = 7; //部分成交
-    static public final int OrderStat_Cancel_Waiting = 8; //撤单请求中
-    static public final int OrderStat_Cancel_Succ = 9; //已撤销
-    static public final int OrderStat_Cancel_Failed = 10; //已撤销
-    static public final int OrderStat_WaitForCancel = 11; //已报待撤销
+    static public final int OrderStat_Cancel_Ready = 8; //待撤单
+    static public final int OrderStat_Cancel_Waiting = 9; //撤单请求中
+    static public final int OrderStat_Cancel_Succ = 10; //已撤销
+    static public final int OrderStat_Cancel_Failed = 11; //撤单失败
+    static public final int OrderStat_WaitForCancel = 12; //已报待撤销
 
     public static String GetSOrderInfoStatDesc(int stat)
     {
@@ -64,11 +71,12 @@ public class OrderInfo
     }
 
     public int id;
-    public String date;
+    public int userId;
+    public String dateTime;
     public String code;
     public String name;
     public  int tradeFlag;
-    public int count;
+    public int orderCount;
     public float orderPrice;    //订单价格
     public float dealPrice;     //成交价格
     public int dealCount;      //成交数量
@@ -99,7 +107,80 @@ public class OrderInfo
     @Override
     public String toString()
     {
-        final String strFormat = "id=%d code=%s name=%s tradeFlag=%s count=%d orderPrice=%.2f dealPrice=%.2f orderStat=%d\n";
-        return String.format(strFormat, 0, code, name, tradeFlag, count, orderPrice, dealPrice, orderStat);
+        final String strFormat = "id=%d code=%s name=%s tradeFlag=%s orderCount=%d orderPrice=%.2f dealPrice=%.2f orderStat=%d\n";
+        return String.format(strFormat, 0, code, name, tradeFlag, orderCount, orderPrice, dealPrice, orderStat);
+    }
+
+    static public OrderInfo GetOrderInfoFromDb(int orderId)
+    {
+        OrderInfo orderInfo = null;
+        final String strFormat = "select * from order_book where id = %d";
+        String sqlStr = String.format(strFormat, orderId);
+        DBQuery dbQuery = DBPool.GetInstance().ExecuteQuerySync(sqlStr);
+        try {
+            ResultSet rs = dbQuery.resultSet;
+            orderInfo.id = rs.getInt("id");
+            orderInfo.platId = rs.getInt("plat_id");
+            orderInfo.tradeFlag = rs.getInt("trade_flag");
+            orderInfo.SetOrderStat(rs.getInt("order_stat"));
+            orderInfo.orderPrice = rs.getFloat("order_price");
+            orderInfo.orderCount = rs.getInt("order_count");
+            orderInfo.platOrderId = rs.getString("plat_order_id");
+            orderInfo.dealPrice = rs.getFloat("deal_price");
+            orderInfo.dealCount = rs.getInt("deal_count");
+            orderInfo.dateTime = rs.getString("datetime");
+            dbQuery.Close();
+        } catch (Exception ex) {
+            LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
+            return orderInfo;
+        } finally {
+            dbQuery.Close();
+            return orderInfo;
+        }
+    }
+
+    static public int SaveDb(OrderInfo orderInfo)
+    {
+        final String sqlFormat = "insert into order_book (user_id, plat_id, code, trade_flag, order_stat, order_price, " +
+                "order_count, plat_order_id, deal_price, deal_count, datetime) " +
+                "values(%d, %d, %s, %d, %d, %.2f, %d, %s, %.2f, %d, %s)";
+
+        String sqlStr = String.format(sqlFormat, orderInfo.userId, orderInfo.platId, orderInfo.code, orderInfo.tradeFlag, orderInfo.GetOrderStat(), orderInfo.orderPrice,
+                orderInfo.orderCount, orderInfo.platOrderId, orderInfo.dealPrice, orderInfo.dealCount, orderInfo.dateTime);
+        orderInfo.id = DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr, true);
+        return orderInfo.id;
+    }
+
+    static public void UpdateOrderStat(int id, int stat)
+    {
+        final String sqlFormat = "update order_book set order_stat = %d where id = %d";
+        String sqlStr = String.format(sqlFormat, stat, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
+    }
+
+    static public void UpdateOrderPlatOrderId(int id, String platOrderId)
+    {
+        final String sqlFormat = "update order_book set plat_order_id = '%s' where id = %d";
+        String sqlStr = String.format(sqlFormat, platOrderId, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
+    }
+
+    static public int GetOrderStat(int orderId)
+    {
+        final String sqlFormat = "select order_stat from order_book where id = %d";
+        String sqlStr = String.format(sqlFormat, orderId);
+        DBQuery dbQuery = DBPool.GetInstance().ExecuteQuerySync(sqlStr);
+        int orderStat = OrderInfo.OrderStat_None;
+        try {
+            ResultSet rs = dbQuery.resultSet;
+            orderStat = rs.getInt("order_stat");
+            dbQuery.Close();
+        } catch (Exception ex) {
+            LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
+            return orderStat;
+        } finally {
+            dbQuery.Close();
+            return orderStat;
+        }
     }
 }

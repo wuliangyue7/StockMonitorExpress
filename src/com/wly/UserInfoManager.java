@@ -66,12 +66,13 @@ public class UserInfoManager
             ResultSet rs = dbQuery.resultSet;
             while (rs.next())
             {
-                userInfo = new UserInfo();
-                userInfo.id = rs.getInt("id");
-                userInfo.platId = rs.getInt("plat_id");
-                userInfo.platAcct = rs.getString("plat_acct");
-                userInfo.platPsw = rs.getString("plat_psw");
-                userInfoHashMap.put(userInfo.id, userInfo);
+//                userInfo = new UserInfo();
+//                userInfo.Init();
+//                userInfo.id = rs.getInt("id");
+//                userInfo.platId = rs.getInt("plat_id");
+//                userInfo.platAcct = rs.getString("plat_acct");
+//                userInfo.platPsw = rs.getString("plat_psw");
+//                userInfoHashMap.put(userInfo.id, userInfo);
             }
             dbQuery.Close();
             return true;
@@ -89,7 +90,7 @@ public class UserInfoManager
         while (iter.hasNext())
         {
             Map.Entry entry = (Map.Entry) iter.next();
-            ((UserInfo)(entry.getValue())).Init();
+//            ((UserInfo)(entry.getValue())).Init();
         }
     }
 }

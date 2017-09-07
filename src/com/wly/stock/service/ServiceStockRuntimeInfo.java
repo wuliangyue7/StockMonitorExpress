@@ -115,7 +115,7 @@ public class    ServiceStockRuntimeInfo extends TimerTask
                 hmStockRuntimeInfo.put(stockRuntimeInfo.code, stockRuntimeInfo);
             }
 
-            StockContext.GetInstance().GetServiceStockStrategy().OnTick();
+//            StockContext.GetInstance().GetServiceStockStrategy().OnTick();
         }
         catch (Exception ex)
         {

@@ -26,13 +26,13 @@ public class StockPriceMonitorTrade extends StockPriceMonitor
 
         boolean canTrade = false;
         if(orderInfo.tradeFlag == StockConst.TradeBuy && orderInfo.orderPrice>= stockMarketInfo.sellInfo.get(0).price
-                && orderInfo.count <= stockMarketInfo.sellInfo.get(0).amount)
+                && orderInfo.orderCount <= stockMarketInfo.sellInfo.get(0).amount)
         {
             canTrade = true;
         }
 
         if(orderInfo.tradeFlag == StockConst.TradeSell && orderInfo.orderPrice <= stockMarketInfo.buyInfo.get(0).price
-                && orderInfo.count <= stockMarketInfo.buyInfo.get(0).amount)
+                && orderInfo.orderCount <= stockMarketInfo.buyInfo.get(0).amount)
         {
             canTrade = true;
         }

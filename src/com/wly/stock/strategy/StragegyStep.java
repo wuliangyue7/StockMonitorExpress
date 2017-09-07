@@ -1,6 +1,7 @@
 package com.wly.stock.strategy;
 
 import com.wly.common.Utils;
+import com.wly.database.DBPool;
 import com.wly.stock.StockContext;
 import com.wly.stock.common.*;
 import com.wly.stock.tradeplat.eastmoney.EastmoneyUtils;
@@ -16,6 +17,7 @@ public class StragegyStep
     static public final int StragegyStepStatNormal = 2;
 
     public int id;
+    public int userId;
     public String code;
     public int stragegyStat;
     public float priceInit;
@@ -27,83 +29,20 @@ public class StragegyStep
     public float priceMin;
     public float priceMax;
     public float priceLast; //上一次交易的参考价格
-    public String platOrderIdBuy;
-    public String platOrderIdSell;
 
-    public Object orderContext;
-
-    public OrderInfo orderBuy;
-    public OrderInfo orderSell;
+    public int orderIdBuy;
+    public int orderIdSell;
 
     private UserInfo userInfo;
-    public ITradePlatform iTradePlatform;
 
     public StragegyStep(UserInfo userInfo)
     {
         this.userInfo = userInfo;
     }
 
-    public void CheckOrderStat(OrderInfo orderInfo)
-    {
-        switch (orderInfo.GetOrderStat())
-        {
-            case OrderInfo.OrderStat_Order_Succ:
-                userInfo.AddOrder(orderInfo);
-                break;
-            case OrderInfo.OrderStat_Deal:
-                OnOrderDeal(orderInfo);
-                break;
-            case OrderInfo.OrderStat_Cancel_Succ:
-                if (orderInfo.tradeFlag == StockConst.TradeBuy)
-                {
-                    orderBuy = null;
-                }
-                else if(orderInfo.tradeFlag == StockConst.TradeSell)
-                {
-                    orderSell = null;
-                }
-                break;
-        }
-    }
-
-    private void OnOrderDeal(OrderInfo orderInfo)
-    {
-        if(orderInfo.tradeFlag == StockConst.TradeBuy)
-        {
-            if(stragegyStat == StragegyStepStatWaitInit)
-            {
-                UpdatePriceLast(priceInit);
-                UpdateStragegyStat(StragegyStepStatNormal);
-            }
-            else if(stragegyStat == StragegyStepStatNormal)
-            {
-                UpdatePriceLast(priceLast- priceStepUint);
-            }
-            orderBuy = null;
-            if(orderSell != null)
-            {
-                iTradePlatform.DoCancelOrder(orderSell);
-            }
-        }
-        else if(orderInfo.tradeFlag == StockConst.TradeSell)
-        {
-            UpdatePriceLast(priceLast + priceStepUint);
-            orderSell = null;
-            if(orderBuy != null)
-            {
-                iTradePlatform.DoCancelOrder(orderBuy);
-            }
-        }
-    }
-
     public void OnTick()
     {
         if(stragegyStat == StragegyStepStatClose)
-        {
-            return;
-        }
-
-        if(!iTradePlatform.IsInit())
         {
             return;
         }
@@ -125,14 +64,20 @@ public class StragegyStep
 
     private void ProcessInit(StockRuntimeInfo stockRuntimeInfo)
     {
-        if (orderBuy != null)
+        int orderStat = OrderInfo.OrderStat_None;
+        if (orderIdBuy != 0)
         {
-            CheckOrderStat(orderBuy);
+            orderStat = OrderInfo.GetOrderStat(orderIdBuy);
+            if(orderStat == OrderInfo.OrderStat_Deal)
+            {
+                SetOrderIdBuy(0);
+                SetStragegyStat(StragegyStepStatNormal);
+            }
             return;
         }
         if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceInit, countInit))
         {
-            TryDoBuyOrder(priceInit, countInit);
+             TryDoBuyOrder(priceInit, countInit);
         }
     }
 
@@ -151,13 +96,24 @@ public class StragegyStep
 
     private void ProcessBuy(StockRuntimeInfo stockRuntimeInfo, float priceBuy)
     {
-        if(orderBuy != null)
+        if(orderIdBuy != 0)
         {
-            CheckOrderStat(orderBuy);
+            int orderStat = OrderInfo.GetOrderStat(orderIdBuy);
+            if(orderStat != OrderInfo.OrderStat_Deal)
+            {
+                return;
+            }
+
+            SetPriceLast(priceLast-priceStepUint);
+            SetOrderIdBuy(0);
+            if(orderIdSell != 0)
+            {
+                OrderInfo.UpdateOrderStat(orderIdSell, OrderInfo.OrderStat_Cancel_Ready);
+                SetOrderIdSell(0);
+            }
             return;
         }
-
-        if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceBuy, countStepUnit))
+        else if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceBuy, countStepUnit))
         {
             TryDoBuyOrder(priceBuy, countStepUnit);
         }
@@ -165,9 +121,20 @@ public class StragegyStep
 
     private void ProcessSell(StockRuntimeInfo stockRuntimeInfo, float priceSell)
     {
-        if(orderSell != null)
+        if(orderIdSell != 0)
         {
-            CheckOrderStat(orderSell);
+            int orderStat = OrderInfo.GetOrderStat(orderIdSell);
+            if(orderStat != OrderInfo.OrderStat_Deal)
+            {
+                return;
+            }
+
+            SetPriceLast(priceLast+priceStepUint);
+            if(orderIdBuy != 0)
+            {
+                OrderInfo.UpdateOrderStat(orderIdBuy, OrderInfo.OrderStat_Cancel_Ready);
+                SetOrderIdBuy(0);
+            }
             return;
         }
 
@@ -180,8 +147,7 @@ public class StragegyStep
         float cost = price * count + fee;
         if(cost <= userInfo.rmbAsset.activeAmount)
         {
-            orderBuy = CreateOrder(StockConst.TradeBuy, price, count);
-            iTradePlatform.DoOrderRequest(orderBuy);
+            orderIdBuy = CreateOrder(StockConst.TradeBuy, price, count);
         }
     }
 
@@ -209,29 +175,72 @@ public class StragegyStep
             }
         }
 
-        orderSell = CreateOrder(StockConst.TradeSell, price, count);
-        iTradePlatform.DoOrderRequest(orderSell);
+        SetOrderIdSell(CreateOrder(StockConst.TradeSell, price, count));
     }
 
-    private OrderInfo CreateOrder(int tradeFlag, float price, int count)
+    private int CreateOrder(int tradeFlag, float price, int count)
     {
         OrderInfo orderInfo = new OrderInfo();
+        orderInfo.userId = userId;
+        orderInfo.SetOrderStat(OrderInfo.OrderStat_Ready);
         orderInfo.tradeFlag = tradeFlag;
         orderInfo.code = code;
-        orderInfo.date = Utils.GetDate();
+        orderInfo.dateTime = Utils.GetDataTime();
         orderInfo.orderPrice = price;
-        orderInfo.count = count;
-        orderInfo.context = orderContext;
-        return orderInfo;
+        orderInfo.orderCount = count;
+        orderInfo.id = OrderInfo.SaveDb(orderInfo);
+        return orderInfo.id;
     }
 
-    private void UpdateStragegyStat(int stragegyStat)
+    private void SetStragegyStat(int stragegyStat)
     {
       this.stragegyStat = stragegyStat;
+        UpdateStragegyStat(id, this.stragegyStat);
     }
 
-    private void UpdatePriceLast(float price)
+    private void SetPriceLast(float price)
     {
         priceLast = price;
+        UpdateStagegyLastPrice(id, priceLast);
+    }
+
+    private void SetOrderIdBuy(int orderId)
+    {
+        orderIdBuy = orderId;
+        UpdateOrderIdBuy(id, orderIdBuy);
+    }
+
+    private void SetOrderIdSell(int orderId)
+    {
+        orderIdSell = orderId;
+        UpdateOrderIdSell(id, orderIdSell);
+    }
+
+    static public void UpdateStragegyStat(int id, int stat)
+    {
+        final String sqlFormat = "update policy_step set policy_stat = %d where id = %d";
+        String sqlStr = String.format(sqlFormat, stat, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
+    }
+
+    static public void UpdateStagegyLastPrice(int id, float price)
+    {
+        final String sqlFormat = "update policy_step set price_last = %.2f where id = %d";
+        String sqlStr = String.format(sqlFormat, price, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
+    }
+
+    static public void UpdateOrderIdBuy(int id, int orderId)
+    {
+        final String sqlFormat = "update policy_step set buyorder_id = %d where id = %d";
+        String sqlStr = String.format(sqlFormat, orderId, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
+    }
+
+    static public void UpdateOrderIdSell(int id, int orderId)
+    {
+        final String sqlFormat = "update policy_step set sellorder_id = %d where id = %d";
+        String sqlStr = String.format(sqlFormat, orderId, id);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
     }
 }
