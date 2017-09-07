@@ -81,7 +81,7 @@ public class OrderInfo
     public float dealPrice;     //成交价格
     public int dealCount;      //成交数量
     public int platId;
-    public String platOrderId;       //交易平台订单id
+    public String platOrderId = "";       //交易平台订单id
 
     private int orderStat = OrderStat_None;   //订单状态
     public String statMessage;  //状态消息
@@ -143,7 +143,7 @@ public class OrderInfo
     {
         final String sqlFormat = "insert into order_book (user_id, plat_id, code, trade_flag, order_stat, order_price, " +
                 "order_count, plat_order_id, deal_price, deal_count, datetime) " +
-                "values(%d, %d, %s, %d, %d, %.2f, %d, %s, %.2f, %d, %s)";
+                "values(%d, %d, '%s', %d, %d, %.2f, %d, '%s', %.2f, %d, '%s')";
 
         String sqlStr = String.format(sqlFormat, orderInfo.userId, orderInfo.platId, orderInfo.code, orderInfo.tradeFlag, orderInfo.GetOrderStat(), orderInfo.orderPrice,
                 orderInfo.orderCount, orderInfo.platOrderId, orderInfo.dealPrice, orderInfo.dealCount, orderInfo.dateTime);

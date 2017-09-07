@@ -102,6 +102,8 @@ public class StragegyStep
             ProcessBuy(stockRuntimeInfo, priceBuy);
         }
 
+        //如果买单交易成功会修改参考价格
+        priceSell = priceLast+ priceStepUint + sellOffset;
         ProcessSell(stockRuntimeInfo, priceSell);
     }
 

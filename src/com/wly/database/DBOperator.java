@@ -48,7 +48,7 @@ public class DBOperator
 
     public DBQuery Query(DBQuery dbQuery)
     {
-        LogUtils.GetLogger(LogUtils.LOG_DB).debug(dbQuery.queryStr);
+//        LogUtils.GetLogger(LogUtils.LOG_DB).debug(dbQuery.queryStr);
         try
         {
             dbQuery.con = ds.getConnection();
