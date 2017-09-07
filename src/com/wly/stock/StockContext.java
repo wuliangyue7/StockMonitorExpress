@@ -1,15 +1,18 @@
 package com.wly.stock;
 
+import com.wly.common.ITickable;
 import com.wly.stock.service.ServiceStockRuntimeInfo;
-import com.wly.stock.service.ServiceStockStrategy;
-import com.wly.stock.service.ServiceStockTrade;
+import com.wly.user.UserManager;
 
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by wuly on 2017/6/26.
  */
-public class StockContext
+public class StockContext extends TimerTask
 {
     static private StockContext s_instace = null;
     static public StockContext GetInstance()
@@ -34,25 +37,25 @@ public class StockContext
         this.serviceStockRuntimeInfo = serviceStockRuntimeInfo;
     }
 
-    private ServiceStockTrade serviceStockTrade;
-    public ServiceStockTrade GetServiceStockTrade()
+//    private ServiceStockTrade serviceStockTrade;
+//    public ServiceStockTrade GetServiceStockTrade()
+//    {
+//        return serviceStockTrade;
+//    }
+//    public void SetServiceStockTrade(ServiceStockTrade serviceStockTrade)
+//    {
+//        this.serviceStockTrade = serviceStockTrade;
+//    }
+
+    public UserManager userManager;
+    public void SetUserManger(UserManager userManager)
     {
-        return serviceStockTrade;
-    }
-    public void SetServiceStockTrade(ServiceStockTrade serviceStockTrade)
-    {
-        this.serviceStockTrade = serviceStockTrade;
+        this.userManager = userManager;
     }
 
-    private ServiceStockStrategy serviceStockStrategy;
-    public ServiceStockStrategy GetServiceStockStrategy()
+    public UserManager GetUserManager()
     {
-        return serviceStockStrategy;
-    }
-
-    public void SetServiceStockStrategy(ServiceStockStrategy serviceStockStrategy)
-    {
-        this.serviceStockStrategy = serviceStockStrategy;
+        return userManager;
     }
 
     private ExecutorService executorService;
@@ -64,5 +67,50 @@ public class StockContext
     public void SetExecutorService(ExecutorService executorService)
     {
         this.executorService = executorService;
+    }
+
+    private Timer timer;
+    private Lock lockTickableHashMap = new ReentrantLock();
+    private HashMap<Integer, ITickable> tickableHashMap = new HashMap<>();
+    private ArrayList<Integer> removeIdList = new ArrayList<>();
+    private int tickableIndex = 0;
+    public int AddTickObject(ITickable tickable)
+    {
+        lockTickableHashMap.lock();
+        tickableHashMap.put(tickableIndex++, tickable);
+        lockTickableHashMap.unlock();
+        return tickableIndex;
+    }
+
+    public void RemoveTickObject(int id)
+    {
+        removeIdList.add(id);
+    }
+
+    public void Start()
+    {
+        if(timer == null)
+        {
+            timer = new Timer();
+        }
+        timer.schedule(this, 0, 1000);
+    }
+
+    @Override
+    public void run()
+    {
+        for(int id : removeIdList)
+        {
+            if(tickableHashMap.containsKey(id))
+            {
+                tickableHashMap.remove(id);
+            }
+        }
+        removeIdList.clear();
+
+        for(Map.Entry<Integer, ITickable> entry: tickableHashMap.entrySet())
+        {
+            entry.getValue().OnTick();
+        }
     }
 }

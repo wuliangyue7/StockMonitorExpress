@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.wly.common.ITickable;
 import com.wly.common.LogUtils;
 import com.wly.common.Utils;
 import com.wly.stock.common.StockConst;
@@ -15,19 +16,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by Administrator on 2017/9/5.
  */
-public class UserManager
+public class UserManager implements ITickable
 {
-    static private UserManager s_instance;
-    static public UserManager GetInstance()
-    {
-        if(s_instance == null)
-        {
-            s_instance = new UserManager();
-        }
-
-        return s_instance;
-    }
-
     private Lock lockUserInfoHashMap = new ReentrantLock();
     private HashMap<Integer, UserInfo> userInfoHashMap = new HashMap<>();
 
@@ -81,27 +71,17 @@ public class UserManager
         lockUserInfoHashMap.unlock();
     }
 
-    private Timer timerUserTick;
-    public void StartUserTick()
+    @Override
+    public void OnTick()
     {
-        timerUserTick = new Timer();
-        timerUserTick.schedule(new UserTick(), 0, 1000);
-    }
-
-    class UserTick extends TimerTask {
-        @Override
-        public void run()
+        lockUserInfoHashMap.lock();
+        Iterator iter = userInfoHashMap.entrySet().iterator();
+        while (iter.hasNext())
         {
-            lockUserInfoHashMap.lock();
-            Iterator iter = userInfoHashMap.entrySet().iterator();
-            while (iter.hasNext())
-            {
-                Map.Entry entry = (Map.Entry) iter.next();
-                UserInfo userInfo = (UserInfo)entry.getValue();
-                userInfo.OnTick();
-            }
-            lockUserInfoHashMap.unlock();
+            Map.Entry entry = (Map.Entry) iter.next();
+            UserInfo userInfo = (UserInfo)entry.getValue();
+            userInfo.OnTick();
         }
+        lockUserInfoHashMap.unlock();
     }
-
 }

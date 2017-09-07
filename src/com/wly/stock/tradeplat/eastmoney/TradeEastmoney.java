@@ -15,6 +15,7 @@ import com.wly.stock.StockContext;
 import com.wly.stock.StockMarketInfoManager;
 import com.wly.stock.common.*;
 import com.wly.stock.strategy.StragegyStep;
+import com.wly.user.RmbAsset;
 import com.wly.user.UserInfo;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -49,9 +50,9 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     private HttpClientContext localContext;
     private String validatekey;
 
-    private float rmb = 0f;
     private UserInfo userInfo;
-    private HashMap<String, StockAsset> stockAssetHashMap = new HashMap<>();
+    public RmbAsset rmbAsset;
+    private HashMap<String, StockAsset> stockAssetHashMap;
 
     public TradeEastmoney(UserInfo userInfo)
     {
@@ -74,9 +75,21 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         this.validatekey = validatekey;
     }
 
-    public float GetRmbAsset()
+    public RmbAsset GetRmbAsset()
     {
-        return rmb;
+        return rmbAsset;
+    }
+
+    @Override
+    public StockAsset GetStockAsset(String code)
+    {
+        return stockAssetHashMap.get(code);
+    }
+
+    @Override
+    public HashMap<String, StockAsset> GetStockAssetList()
+    {
+        return stockAssetHashMap;
     }
 
     public StockAsset GetStockCountActive(String code)
@@ -112,7 +125,6 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         }
     }
 
-    @Override
     public void DoGetRmbAsset()
     {
         try
@@ -150,7 +162,12 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             return;
         }
         JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
-        rmb = jsonDataArray.get(0).getAsJsonObject().get("Kyzj").getAsFloat();
+//        rmb = jsonDataArray.get(0).getAsJsonObject().get("Kyzj").getAsFloat();
+        if(rmbAsset == null)
+        {
+            rmbAsset = new RmbAsset();
+        }
+        rmbAsset.activeAmount = jsonDataArray.get(0).getAsJsonObject().get("Kyzj").getAsFloat();
     }
 
     @Override
@@ -189,6 +206,12 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     }
 
     @Override
+    public void DoRefreshAsset()
+    {
+        DoGetRmbAsset();
+        DoGetStockAsset();
+    }
+
     public void DoGetStockAsset()
     {
         try
@@ -233,6 +256,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             int i;
             JsonObject newOrderInfo;
             StockAsset stockAsset;
+            stockAssetHashMap = new HashMap<>();
             for (i = 0; i < jsonDataArray.size(); ++i)
             {
                 stockAsset = new StockAsset();
@@ -303,6 +327,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         String platOrderId = jsonDataArray.get(0).getAsJsonObject().get("Wtbh").getAsString();
         OrderInfo.UpdateOrderPlatOrderId(orderId, platOrderId);
         OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Order_Succ);
+        DoRefreshAsset();
     }
 
     @Override
@@ -404,6 +429,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         System.out.println(retStr);
         int orderId = (int)task.param;
         OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Cancel_Succ);
+        DoRefreshAsset();
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.wly.stock.service.http;
 import com.wly.UserInfoManager;
 import com.wly.database.DBOperator;
 import com.wly.database.DBPool;
+import com.wly.stock.StockContext;
 import com.wly.stock.common.StockConst;
 import com.wly.user.UserManager;
 import io.netty.handler.codec.http.HttpMethod;
@@ -24,7 +25,7 @@ public class UserLoginControl
     {
         String ret = null;
         String jsonStr = req.getBody().toString(ContentType.CHARSET);
-        ret = UserManager.GetInstance().AddUser(jsonStr);
+        StockContext.GetInstance().GetUserManager().AddUser(jsonStr);
         return ret;
     }
 

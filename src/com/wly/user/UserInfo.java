@@ -11,6 +11,7 @@ import com.wly.stock.StockMarketInfoManager;
 import com.wly.stock.common.StockConst;
 import com.wly.stock.common.*;
 import com.wly.stock.strategy.StragegyStep;
+import com.wly.stock.tradeplat.ITradeInterface;
 import com.wly.stock.tradeplat.eastmoney.TradeEastmoney;
 import com.wly.stock.tradeplat.simulate.TradeSimulate;
 
@@ -29,9 +30,6 @@ public class UserInfo implements IAsyncCallBack, ITickable
 {
     private int id;
     public String name;
-    public RmbAsset rmbAsset;
-    public HashMap<String, StockAsset> stockAssetHashMap = new HashMap<>();
-    private Lock lockOrderList = new ReentrantLock();
 
     private HashMap<Integer, ITradePlatform> tradePlatformHashMap = new HashMap<>();
     public ITradePlatform tradeInterface;
@@ -40,9 +38,6 @@ public class UserInfo implements IAsyncCallBack, ITickable
     public UserInfo(int id)
     {
         this.id = id;
-        rmbAsset = new RmbAsset();
-        rmbAsset.code = StockConst.RmbCode;
-        rmbAsset.name = StockConst.RmbName;
         tradePlatformHashMap.put(StockConst.PlatSimulate, new TradeSimulate());
         tradePlatformHashMap.put(StockConst.PlatEastmoney, new TradeEastmoney(this));
 
@@ -55,6 +50,7 @@ public class UserInfo implements IAsyncCallBack, ITickable
         if(tradePlatform != null)
         {
             tradePlatform.SetContext(context);
+            tradePlatform.DoRefreshAsset();
         }
     }
 
@@ -75,6 +71,7 @@ public class UserInfo implements IAsyncCallBack, ITickable
                 stragegyStep = new StragegyStep(this);
                 stragegyStep.id = rs.getInt("id");
                 stragegyStep.userId = rs.getInt("user_id");
+                stragegyStep.platId = rs.getInt("plat_id");
                 stragegyStep.code = rs.getString("code");
                 stragegyStep.priceInit = rs.getFloat("price_init");
                 stragegyStep.countInit = rs.getInt("count_init");
@@ -116,9 +113,16 @@ public class UserInfo implements IAsyncCallBack, ITickable
         }
     }
 
-    public StockAsset GetStockAsset(String code)
+    public StockAsset GetStockAsset(int platId, String code)
     {
-        return stockAssetHashMap.get(code);
+        ITradePlatform tradeInterface = tradePlatformHashMap.get(platId);
+        return tradeInterface.GetStockAsset(code);
+    }
+
+    public RmbAsset GetRmbAsset(int platId)
+    {
+        ITradePlatform tradeInterface = tradePlatformHashMap.get(platId);
+        return tradeInterface.GetRmbAsset();
     }
 
     @Override

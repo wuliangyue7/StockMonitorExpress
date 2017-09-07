@@ -5,6 +5,7 @@ import com.wly.database.DBPool;
 import com.wly.stock.StockContext;
 import com.wly.stock.common.*;
 import com.wly.stock.tradeplat.eastmoney.EastmoneyUtils;
+import com.wly.user.RmbAsset;
 import com.wly.user.UserInfo;
 
 /**
@@ -18,6 +19,7 @@ public class StragegyStep
 
     public int id;
     public int userId;
+    public int platId;
     public String code;
     public int stragegyStat;
     public float priceInit;
@@ -145,7 +147,8 @@ public class StragegyStep
     {
         float fee = EastmoneyUtils.CaculateTradeFee(code, StockConst.TradeBuy, price, count);
         float cost = price * count + fee;
-        if(cost <= userInfo.rmbAsset.activeAmount)
+        RmbAsset rmbAsset = userInfo.GetRmbAsset(platId);
+        if(rmbAsset!= null && cost <= rmbAsset.activeAmount)
         {
             orderIdBuy = CreateOrder(StockConst.TradeBuy, price, count);
         }
@@ -153,7 +156,11 @@ public class StragegyStep
 
     private void TryDoSellOrder(float price, int count)
     {
-        StockAsset stockAsset = userInfo.GetStockAsset(code);
+        StockAsset stockAsset = userInfo.GetStockAsset(platId, code);
+        if(stockAsset == null)
+        {
+            return;
+        }
 
         if(price >= priceMax)
         {
