@@ -274,4 +274,10 @@ public class StragegyStep
                 stragegyStep.priceMax);
         DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
     }
+
+    static public void ClearOrderId()
+    {
+        final String strSql = "update policy_step set sellorder_id='0', buyorder_id = '0'";
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(strSql);
+    }
 }

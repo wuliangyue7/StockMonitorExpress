@@ -160,8 +160,8 @@ public class OrderInfo
 
     static public void UpdateOrderPlatOrderId(int id, String platOrderId)
     {
-        final String sqlFormat = "update order_book set plat_order_id = '%s' where id = %d";
-        String sqlStr = String.format(sqlFormat, platOrderId, id);
+        final String sqlFormat = "update order_book set plat_order_id = '%s',order_stat = %d  where id = %d";
+        String sqlStr = String.format(sqlFormat, platOrderId, OrderInfo.OrderStat_Order_Succ, id);
         DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
     }
 

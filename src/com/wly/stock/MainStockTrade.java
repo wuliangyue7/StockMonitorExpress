@@ -26,6 +26,7 @@ public class MainStockTrade
         stockContext.SetUserManger(new UserManager());
         stockContext.GetServiceStockRuntimeInfo().Start();
 
+        stockContext.Init();
         stockContext.Start();
         ServiceHttp serviceHttp = new ServiceHttp();
         serviceHttp.Start();

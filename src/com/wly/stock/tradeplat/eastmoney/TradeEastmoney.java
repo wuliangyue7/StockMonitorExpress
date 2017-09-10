@@ -312,7 +312,6 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
         String platOrderId = jsonDataArray.get(0).getAsJsonObject().get("Wtbh").getAsString();
         OrderInfo.UpdateOrderPlatOrderId(orderId, platOrderId);
-        OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Order_Succ);
         DoRefreshAsset();
     }
 
@@ -380,6 +379,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             orderInfo.dateTime = newOrderInfo.get("Wtrq").getAsString();
             orderInfo.SetOrderStat(EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString()));
             orderInfos.add(orderInfo);
+
         }
     }
 
@@ -421,6 +421,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     @Override
     public void OnTick()
     {
+        DoQueryOrderStat();
         final String SqlFormat = "select * from order_book where user_id = %d and order_stat in (%d, %d)";
         String sqlStr = String.format(SqlFormat, userInfo.GetUserId(), OrderInfo.OrderStat_Ready, OrderInfo.OrderStat_Cancel_Ready);
         DBPool dbPool = DBPool.GetInstance();
