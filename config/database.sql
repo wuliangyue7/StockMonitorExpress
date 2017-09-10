@@ -10,10 +10,25 @@ Target Server Type    : MYSQL
 Target Server Version : 50716
 File Encoding         : 65001
 
-Date: 2017-09-07 23:22:02
+Date: 2017-09-10 21:14:04
 */
 
 SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for `config_global`
+-- ----------------------------
+DROP TABLE IF EXISTS `config_global`;
+CREATE TABLE `config_global` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `value` text COMMENT '上一次交易日，用作启动时候清理表格',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- ----------------------------
+-- Records of config_global
+-- ----------------------------
+INSERT INTO `config_global` VALUES ('1', '2017-09-10');
 
 -- ----------------------------
 -- Table structure for `order_book`
@@ -33,11 +48,13 @@ CREATE TABLE `order_book` (
   `deal_count` int(11) DEFAULT '0',
   `datetime` char(15) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of order_book
 -- ----------------------------
+INSERT INTO `order_book` VALUES ('1', '1', '0', '600056', '1', '2', '24.28', '500', '', '0.00', '0', '20170908-200653');
+INSERT INTO `order_book` VALUES ('2', '1', '0', '600056', '1', '2', '24.28', '500', '', '0.00', '0', '20170910-151531');
 
 -- ----------------------------
 -- Table structure for `policy_step`
@@ -61,7 +78,7 @@ CREATE TABLE `policy_step` (
   `buyorder_id` char(64) DEFAULT NULL,
   `sellorder_id` char(64) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of policy_step
@@ -88,7 +105,7 @@ CREATE TABLE `trade_book` (
   `stamp_tax` float(11,2) unsigned NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=311 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of trade_book
@@ -105,9 +122,24 @@ CREATE TABLE `userinfo` (
   `plat_acct` tinytext NOT NULL,
   `plat_psw` tinytext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of userinfo
 -- ----------------------------
 INSERT INTO `userinfo` VALUES ('00000000001', '2', '0', '540600166072', '123456');
+
+-- ----------------------------
+-- Procedure structure for `ClearStragegyOrderId`
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `ClearStragegyOrderId`;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ClearStragegyOrderId`()
+BEGIN
+	#Routine body goes here...
+	DECLARE lastdate Date;
+	SELECT date_pre into lastdate from global_config where id = 1;
+	SELECT lastdate;
+END
+;;
+DELIMITER ;
