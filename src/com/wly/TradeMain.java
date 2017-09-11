@@ -1,6 +1,7 @@
 package com.wly;
 
 import com.wly.common.LogUtils;
+import com.wly.common.Utils;
 import com.wly.stock.tradeplat.eastmoney.TradeEastmoneyImpl;
 
 /**
@@ -12,6 +13,7 @@ public class TradeMain
     {
         LogUtils.Init("config/log4j.properties");
         TradeEastmoneyImpl tradeEastmoney = new TradeEastmoneyImpl();
-        tradeEastmoney.Login("540600166072", "870120");
+        String psw = Utils.GetInput("please input password:");
+        tradeEastmoney.Login("540600166072", psw);
     }
 }
