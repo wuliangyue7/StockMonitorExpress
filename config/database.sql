@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50716
 File Encoding         : 65001
 
-Date: 2017-09-10 21:14:04
+Date: 2017-09-11 21:09:59
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -28,7 +28,7 @@ CREATE TABLE `config_global` (
 -- ----------------------------
 -- Records of config_global
 -- ----------------------------
-INSERT INTO `config_global` VALUES ('1', '2017-09-10');
+INSERT INTO `config_global` VALUES ('1', '2017-09-11');
 
 -- ----------------------------
 -- Table structure for `order_book`
@@ -40,7 +40,7 @@ CREATE TABLE `order_book` (
   `plat_id` int(11) NOT NULL,
   `code` char(10) NOT NULL,
   `trade_flag` int(1) NOT NULL COMMENT '0-buy 1-sell',
-  `order_stat` int(11) NOT NULL DEFAULT '0' COMMENT '0-未知 1-创建完成 2-已下单等待结果 3-下单成功 4-下单失败 5-订单查状态询中 6-已成交 7-部分成交 8-待撤单 9-正在请求撤单 10-已撤单 11-撤单失败 12-已经提交撤单等待结果',
+  `order_stat` int(11) NOT NULL DEFAULT '0' COMMENT '0-未知 1-创建完成 2-已下单等待结果 3-下单成功 4-下单失败 5-已成交 6-部分成交 7-待撤单 8-正在请求撤单 9-已撤单 10-撤单失败',
   `order_price` float(11,2) NOT NULL,
   `order_count` int(11) NOT NULL,
   `plat_order_id` char(64) DEFAULT NULL,
@@ -48,13 +48,14 @@ CREATE TABLE `order_book` (
   `deal_count` int(11) DEFAULT '0',
   `datetime` char(15) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 -- ----------------------------
 -- Records of order_book
 -- ----------------------------
 INSERT INTO `order_book` VALUES ('1', '1', '0', '600056', '1', '2', '24.28', '500', '', '0.00', '0', '20170908-200653');
 INSERT INTO `order_book` VALUES ('2', '1', '0', '600056', '1', '2', '24.28', '500', '', '0.00', '0', '20170910-151531');
+INSERT INTO `order_book` VALUES ('3', '1', '0', '600056', '1', '1', '24.28', '500', '', '0.00', '0', '20170911-210152');
 
 -- ----------------------------
 -- Table structure for `policy_step`
@@ -83,7 +84,7 @@ CREATE TABLE `policy_step` (
 -- ----------------------------
 -- Records of policy_step
 -- ----------------------------
-INSERT INTO `policy_step` VALUES ('1', '1', '1', '600056', '2', '23.00', '24.10', '3000', '1.20', '500', '-0.03', '0.08', '20.00', '30.00', '0', '0');
+INSERT INTO `policy_step` VALUES ('1', '1', '1', '600056', '2', '23.00', '24.10', '3000', '1.20', '500', '-0.03', '0.08', '20.00', '30.00', '0', '3');
 
 -- ----------------------------
 -- Table structure for `trade_book`
