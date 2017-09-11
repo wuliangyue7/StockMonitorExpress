@@ -56,11 +56,21 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     public RmbAsset rmbAsset;
     private HashMap<String, StockAsset> stockAssetHashMap;
 
+    public ArrayList<String> queryPlatOrderList = new ArrayList<>();
+
     public TradeEastmoney(UserInfo userInfo)
     {
         this.userInfo = userInfo;
         localContext = new HttpClientContext();
         localContext.setCookieStore(new BasicCookieStore());
+        InitQueryPlatOrderId();
+    }
+
+    private void InitQueryPlatOrderId()
+    {
+        ArrayList<String> platOrderIdList = OrderInfo.GetQueryPlatOrderId(userInfo.GetUserId(), StockConst.PlatEastmoney);
+        queryPlatOrderList.clear();
+        queryPlatOrderList.addAll(platOrderIdList);
     }
 
     public RmbAsset GetRmbAsset()
@@ -312,6 +322,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
         String platOrderId = jsonDataArray.get(0).getAsJsonObject().get("Wtbh").getAsString();
         OrderInfo.UpdateOrderPlatOrderId(orderId, platOrderId);
+        queryPlatOrderList.add(platOrderId);
         DoRefreshAsset();
     }
 
@@ -358,28 +369,33 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
         int i;
         JsonObject newOrderInfo;
+        String platOrderId;
         int orderStat;
         String tradeFlag;
         OrderInfo orderInfo;
-        ArrayList<OrderInfo> orderInfos = new ArrayList<>();
+//        ArrayList<OrderInfo> orderInfos = new ArrayList<>();
         for (i = 0; i < jsonDataArray.size(); ++i)
         {
             newOrderInfo = jsonDataArray.get(i).getAsJsonObject();
-            orderInfo = new OrderInfo();
-            orderInfo.platId = StockConst.PlatEastmoney;
-            orderInfo.code = newOrderInfo.get("Zqdm").getAsString();
-            orderInfo.name = newOrderInfo.get("Zqmc").getAsString();
-            orderInfo.orderPrice = newOrderInfo.get("Wtjg").getAsFloat();
-            orderInfo.orderCount = newOrderInfo.get("Wtsl").getAsInt();
-            orderInfo.platOrderId = newOrderInfo.get("Wtbh").getAsString();
-            orderInfo.dealPrice = newOrderInfo.get("Cjjg").getAsFloat();
-            orderInfo.dealCount = newOrderInfo.get("Cjsl").getAsInt();
-            tradeFlag = newOrderInfo.get("Mmlb").getAsString();
-            orderInfo.tradeFlag = tradeFlag.equals("B")?StockConst.TradeBuy:StockConst.TradeSell;
-            orderInfo.dateTime = newOrderInfo.get("Wtrq").getAsString();
-            orderInfo.SetOrderStat(EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString()));
-            orderInfos.add(orderInfo);
-
+            platOrderId = newOrderInfo.get("Wtbh").getAsString();
+            if(queryPlatOrderList.contains(platOrderId))
+            {
+                orderStat = EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString());
+                if(orderStat == OrderInfo.OrderStat_Cancel_Failed || orderStat==OrderInfo.OrderStat_Cancel_Succ ||
+                        orderStat == OrderInfo.OrderStat_Deal || orderStat == OrderInfo.OrderStat_Half ||
+                        orderStat == OrderInfo.OrderStat_Deal)
+                {
+                    OrderInfo.UpdateOrderStatByPlatOrderId(platOrderId, orderStat);
+                    if(orderStat==OrderInfo.OrderStat_Cancel_Succ || orderStat == OrderInfo.OrderStat_Deal)
+                    {
+                        queryPlatOrderList.remove(platOrderId);
+                    }
+                    LogUtils.LogRealtime(String.format("OrderStat:%s %s %s %s %s %s %s", newOrderInfo.get("Zqdm").getAsString(),
+                            newOrderInfo.get("Zqmc").getAsString(), newOrderInfo.get("Mmsm").getAsString(),
+                            newOrderInfo.get("Wtzt").getAsString(),newOrderInfo.get("Cjsl").getAsString(),
+                            newOrderInfo.get("Cjje").getAsString(),newOrderInfo.get("Khxm").getAsString()));
+                }
+            }
         }
     }
 
@@ -387,6 +403,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
     {
         try
         {
+            queryPlatOrderList.add(platOrderId);
             String date = Utils.GetDate();// new Date()为获取当前系统时间
             final String RevokeUrl = "/Trade/RevokeOrders?validatekey=";
             //"20170213_140266RevokeUrl"
@@ -401,6 +418,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             httpTask.httpUriRequest = httpPost;
             httpTask.httpClientContext = localContext;
             httpTask.param = orderId;
+            queryPlatOrderList.add(platOrderId);
             OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Cancel_Waiting);
             StockContext.GetInstance().GetExecutorService().execute(httpTask);
         } catch (UnsupportedEncodingException e)

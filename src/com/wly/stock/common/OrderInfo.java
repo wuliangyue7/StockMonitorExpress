@@ -5,6 +5,7 @@ import com.wly.database.DBPool;
 import com.wly.database.DBQuery;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2017/2/9.
@@ -16,14 +17,12 @@ public class OrderInfo
     static public final int OrderStat_Order_Waiting = 2; //下单请求中
     static public final int OrderStat_Order_Succ = 3; //已下单
     static public final int OrderStat_Order_Failed = 4; //下单失败
-    static public final int OrderStat_Query_Waiting = 5; //订单状态查询中
-    static public final int OrderStat_Deal = 6;  //已成交
-    static public final int OrderStat_Half = 7; //部分成交
-    static public final int OrderStat_Cancel_Ready = 8; //待撤单
-    static public final int OrderStat_Cancel_Waiting = 9; //撤单请求中
-    static public final int OrderStat_Cancel_Succ = 10; //已撤销
-    static public final int OrderStat_Cancel_Failed = 11; //撤单失败
-    static public final int OrderStat_WaitForCancel = 12; //已报待撤销
+    static public final int OrderStat_Deal = 5;  //已成交
+    static public final int OrderStat_Half = 6; //部分成交
+    static public final int OrderStat_Cancel_Ready = 7; //待撤单
+    static public final int OrderStat_Cancel_Waiting = 8; //撤单请求中
+    static public final int OrderStat_Cancel_Succ = 9; //已撤销
+    static public final int OrderStat_Cancel_Failed = 10; //撤单失败
 
     public static String GetSOrderInfoStatDesc(int stat)
     {
@@ -42,9 +41,6 @@ public class OrderInfo
             case OrderStat_Order_Failed:
                 statDesc = "OrderFailed";
                 break;
-            case OrderStat_Query_Waiting:
-                statDesc = "statQuery";
-                break;
             case OrderStat_Deal:
                 statDesc = "deal";
                 break;
@@ -59,9 +55,6 @@ public class OrderInfo
                 break;
             case OrderStat_Cancel_Failed:
                 statDesc = "cancelFailed";
-                break;
-            case OrderStat_WaitForCancel:
-                statDesc = "waitForCancel";
                 break;
             default:
                 statDesc = "none";
@@ -96,12 +89,6 @@ public class OrderInfo
     public int GetOrderStat()
     {
         return orderStat;
-    }
-
-    public boolean IsWaiting()
-    {
-        return orderStat == OrderStat_Order_Waiting || orderStat == OrderStat_Cancel_Waiting
-                || orderStat == OrderStat_Query_Waiting;
     }
 
     @Override
@@ -158,6 +145,13 @@ public class OrderInfo
         DBPool.GetInstance().ExecuteNoQuerySqlSync(sqlStr);
     }
 
+    static public void UpdateOrderStatByPlatOrderId(String platOrderId, int orderStat)
+    {
+        final String sqlFormat = "update order_book set order_stat = %d where plat_order_id = '%s'";
+        String sqlStr = String.format(sqlFormat, orderStat, platOrderId);
+        DBPool.GetInstance().ExecuteNoQuerySqlAsync(sqlStr);
+    }
+
     static public void UpdateOrderPlatOrderId(int id, String platOrderId)
     {
         final String sqlFormat = "update order_book set plat_order_id = '%s',order_stat = %d  where id = %d";
@@ -184,6 +178,31 @@ public class OrderInfo
         } finally {
             dbQuery.Close();
             return orderStat;
+        }
+    }
+
+    static public ArrayList<String> GetQueryPlatOrderId(int userId, int platId)
+    {
+        ArrayList<String> platOrderList = new ArrayList<>();
+        DBPool dbPool = DBPool.GetInstance();
+        DBQuery dbQuery = dbPool.ExecuteQuerySync(String.format("select plat_order_id from order_book where user_id=%d " +
+                        "and plat_id=%d and order_stat in (%d, %d,%d)", userId, platId, OrderStat_Order_Succ, OrderStat_Half,
+                OrderStat_Cancel_Waiting));
+        try {
+            ResultSet rs = dbQuery.resultSet;
+            while (rs.next())
+            {
+                platOrderList.add(rs.getString("plat_order_id"));
+            }
+        }
+        catch (Exception ex)
+        {
+            LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
+        }
+        finally
+        {
+            dbQuery.Close();
+            return platOrderList;
         }
     }
 }

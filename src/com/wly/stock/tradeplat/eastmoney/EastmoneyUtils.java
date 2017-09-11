@@ -31,7 +31,7 @@ public class EastmoneyUtils
                 stat = OrderInfo.OrderStat_Half;
                 break;
             case OrderStat_WaitForCancel:
-                stat = OrderInfo.OrderStat_WaitForCancel;
+                stat = OrderInfo.OrderStat_Cancel_Waiting;
                 break;
             case OrderStat_Done:
                 stat = OrderInfo.OrderStat_Deal;
