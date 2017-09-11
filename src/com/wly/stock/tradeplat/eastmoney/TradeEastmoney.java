@@ -390,7 +390,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
                     {
                         queryPlatOrderList.remove(platOrderId);
                     }
-                    LogUtils.LogRealtime(String.format("OrderStat:%s %s %s %s %s %s %s", newOrderInfo.get("Zqdm").getAsString(),
+                    LogUtils.LogTrade(String.format("OrderStat:%s %s %s %s %s %s %s", newOrderInfo.get("Zqdm").getAsString(),
                             newOrderInfo.get("Zqmc").getAsString(), newOrderInfo.get("Mmsm").getAsString(),
                             newOrderInfo.get("Wtzt").getAsString(),newOrderInfo.get("Cjsl").getAsString(),
                             newOrderInfo.get("Cjje").getAsString(),newOrderInfo.get("Khxm").getAsString()));
