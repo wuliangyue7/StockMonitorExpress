@@ -1,34 +1,25 @@
 package com.wly.stock.service.http;
 
-import com.wly.common.Utils;
+import com.wly.stock.StockContext;
+import org.restexpress.ContentType;
 import org.restexpress.Request;
 import org.restexpress.Response;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Created by wuly on 2017/8/12.
+ * Created by wuly on 2017/9/11.
  */
-public class UserLoginControl
+public class TokenInfoEastmoney
 {
     //for post
     public String create(Request req, Response res)
     {
         String ret = null;
-        Map<String, List<String>> queryInfo = req.getBodyFromUrlFormEncoded();
-        if(!queryInfo.containsKey("account"))
-        {
-            return Utils.FormatResult(-1, "account is null");
-        }
-
-        if(!queryInfo.containsKey("password"))
-        {
-            return Utils.FormatResult(-1, "password is null");
-        }
-
-        return Utils.FormatResult(0, "login succ");
+        String jsonStr = req.getBody().toString(ContentType.CHARSET);
+        StockContext.GetInstance().GetUserManager().AddUser(jsonStr);
+        return ret;
     }
 
     //for Get

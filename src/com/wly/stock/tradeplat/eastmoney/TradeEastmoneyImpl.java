@@ -129,7 +129,7 @@ public class TradeEastmoneyImpl implements ITradeInterface
             jsonObject1.add("cookies", jsonArray);
             jsonObject1.addProperty("validatekey", validatekey);
 
-            HttpPost httpPostTestLoginToken = new HttpPost("http://127.0.0.1:8080/userlogin");
+            HttpPost httpPostTestLoginToken = new HttpPost("http://127.0.0.1:8080/tokenInfoEastmoney");
             httpPostTestLoginToken.setEntity(new StringEntity(jsonObject1.toString(), "utf-8"));
             CloseableHttpClient httpclientTest = HttpClients.createDefault();
             CloseableHttpResponse responseTest = httpclientTest.execute(httpPostTestLoginToken);

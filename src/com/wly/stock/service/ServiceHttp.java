@@ -1,5 +1,6 @@
 package com.wly.stock.service;
 
+import com.wly.stock.service.http.TokenInfoEastmoney;
 import com.wly.stock.service.http.UserLoginControl;
 import io.netty.handler.codec.http.HttpMethod;
 import org.restexpress.Request;
@@ -21,6 +22,7 @@ public class ServiceHttp
         RestExpress server = new RestExpress();
         server.setName("stock");
         server.uri("/userlogin", new UserLoginControl()).method(HttpMethod.GET, HttpMethod.POST).noSerialization();
+        server.uri("/tokenInfoEastmoney", new TokenInfoEastmoney()).method(HttpMethod.GET, HttpMethod.POST).noSerialization();
 //        server.setPort(8080);
         server.bind(8080);
         server.awaitShutdown();
