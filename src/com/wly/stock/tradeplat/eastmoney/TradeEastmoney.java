@@ -296,7 +296,6 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             httpTask.httpUriRequest = httpPost;
             httpTask.httpClientContext = localContext;
             httpTask.param = orderId;
-            OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Order_Waiting);
             StockContext.GetInstance().GetExecutorService().execute(httpTask);
         } catch (UnsupportedEncodingException e)
         {
@@ -378,6 +377,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         {
             newOrderInfo = jsonDataArray.get(i).getAsJsonObject();
             platOrderId = newOrderInfo.get("Wtbh").getAsString();
+            orderStat = EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString());
             if(queryPlatOrderList.contains(platOrderId))
             {
                 orderStat = EastmoneyUtils.GetStatByPlatStat(newOrderInfo.get("Wtzt").getAsString());
@@ -419,7 +419,6 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             httpTask.httpClientContext = localContext;
             httpTask.param = orderId;
             queryPlatOrderList.add(platOrderId);
-            OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Cancel_Waiting);
             StockContext.GetInstance().GetExecutorService().execute(httpTask);
         } catch (UnsupportedEncodingException e)
         {
@@ -432,7 +431,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         String retStr = Utils.GetResponseContent(response);
         System.out.println(retStr);
         int orderId = (int)task.param;
-        OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Cancel_Succ);
+        OrderInfo.UpdateOrderStat(orderId, OrderInfo.OrderStat_Cancel_Waiting);
         DoRefreshAsset();
     }
 

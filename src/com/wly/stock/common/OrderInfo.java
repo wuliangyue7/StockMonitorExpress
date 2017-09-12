@@ -14,15 +14,14 @@ public class OrderInfo
 {
     static public final int OrderStat_None = 0; //未知状态
     static public final int OrderStat_Ready = 1; //待下单状态
-    static public final int OrderStat_Order_Waiting = 2; //下单请求中
-    static public final int OrderStat_Order_Succ = 3; //已下单
-    static public final int OrderStat_Order_Failed = 4; //下单失败
-    static public final int OrderStat_Deal = 5;  //已成交
-    static public final int OrderStat_Half = 6; //部分成交
-    static public final int OrderStat_Cancel_Ready = 7; //待撤单
-    static public final int OrderStat_Cancel_Waiting = 8; //撤单请求中
-    static public final int OrderStat_Cancel_Succ = 9; //已撤销
-    static public final int OrderStat_Cancel_Failed = 10; //撤单失败
+    static public final int OrderStat_Order_Succ = 2; //已下单
+    static public final int OrderStat_Order_Failed = 3; //下单失败
+    static public final int OrderStat_Deal = 4;  //已成交
+    static public final int OrderStat_Half = 5; //部分成交
+    static public final int OrderStat_Cancel_Ready = 6; //待撤单
+    static public final int OrderStat_Cancel_Waiting = 7; //撤单请求中
+    static public final int OrderStat_Cancel_Succ = 8; //已撤销
+    static public final int OrderStat_Cancel_Failed = 9; //撤单失败
 
     public static String GetSOrderInfoStatDesc(int stat)
     {
@@ -31,9 +30,6 @@ public class OrderInfo
         {
             case OrderStat_Ready:
                 statDesc = "ready";
-                break;
-            case OrderStat_Order_Waiting:
-                statDesc = "OrderWaiting";
                 break;
             case OrderStat_Order_Succ:
                 statDesc = "orderSucc";
