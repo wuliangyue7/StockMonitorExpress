@@ -139,7 +139,13 @@ public class StockContext extends TimerTask
             return;
         }
 
-        StragegyStep.ClearOrderId();
+        if(OrderInfo.CheckHasHalfOrder())
+        {
+            LogUtils.LogRealtime("half deal order exists! please resolve it manual!");
+            System.exit(-1);
+        }
+
+        OrderInfo.ResetOrder();
         final String sqlFormat = "update config_global set value='%s' where id = 1";
         String strSql = String.format(sqlFormat, nowDate);
         DBPool.GetInstance().ExecuteNoQuerySqlSync(strSql);

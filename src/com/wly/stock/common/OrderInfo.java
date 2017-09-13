@@ -22,6 +22,7 @@ public class OrderInfo
     static public final int OrderStat_Cancel_Waiting = 7; //撤单请求中
     static public final int OrderStat_Cancel_Succ = 8; //已撤销
     static public final int OrderStat_Cancel_Failed = 9; //撤单失败
+    static public final int OrderStat_Hang = 10; //隔日处理挂起
 
     public static String GetSOrderInfoStatDesc(int stat)
     {
@@ -112,7 +113,6 @@ public class OrderInfo
             orderInfo.dealPrice = rs.getFloat("deal_price");
             orderInfo.dealCount = rs.getInt("deal_count");
             orderInfo.dateTime = rs.getString("datetime");
-            dbQuery.Close();
         } catch (Exception ex) {
             LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
             return orderInfo;
@@ -167,7 +167,6 @@ public class OrderInfo
             {
                 orderStat = rs.getInt("order_stat");
             }
-            dbQuery.Close();
         } catch (Exception ex) {
             LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
             return orderStat;
@@ -199,6 +198,40 @@ public class OrderInfo
         {
             dbQuery.Close();
             return platOrderList;
+        }
+    }
+
+    static public void ResetOrder()
+    {
+        final String sqlFormat = "update order_book set order_stat=%d where order_stat in (%d, %d, %d,%d)";
+        String strSql = String.format(sqlFormat, OrderStat_Hang, OrderStat_Cancel_Waiting,
+                OrderStat_Cancel_Failed, OrderStat_Half, OrderStat_Cancel_Ready);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(strSql);
+
+        final String sqlFormatReset = "update order_book set order_stat=%d where order_stat in (%d)";
+        String strSqlReset = String.format(sqlFormatReset, OrderStat_Ready, OrderStat_Order_Succ);
+        DBPool.GetInstance().ExecuteNoQuerySqlSync(strSqlReset);
+    }
+
+    static public boolean CheckHasHalfOrder()
+    {
+        boolean ret = false;
+        final String strSqlFormat = "select count(*) as count from order_book where order_stat=%d";
+        String strSql = String.format(strSqlFormat, OrderStat_Half);
+        DBQuery dbQuery = DBPool.GetInstance().ExecuteQuerySync(strSql);
+        int count= 0;
+        try {
+            ResultSet rs = dbQuery.resultSet;
+            if(rs.next())
+            {
+                count = rs.getInt("count");
+                ret = count != 0;
+            }
+        } catch (Exception ex) {
+            LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
+        } finally {
+            dbQuery.Close();
+            return ret;
         }
     }
 }
