@@ -72,6 +72,7 @@ public class StragegyStep
 
     private void ProcessInit(StockRuntimeInfo stockRuntimeInfo)
     {
+
         int orderStat = OrderInfo.OrderStat_None;
         if (orderIdBuy != 0)
         {
@@ -83,6 +84,8 @@ public class StragegyStep
             }
             return;
         }
+        LogUtils.LogRealtime(String.format("ProcessInit: %d code=%s %s priceNow=%.2f priceBuy=%.2f", id,
+                code, stockRuntimeInfo.name, stockRuntimeInfo.priceNew, priceInit));
         if (StockUtils.TestTrade(stockRuntimeInfo, StockConst.TradeBuy, priceInit, countInit))
         {
              TryDoBuyOrder(priceInit, countInit);
