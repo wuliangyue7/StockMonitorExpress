@@ -279,6 +279,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
             StockRuntimeInfo stockRuntimeInfo = StockContext.GetInstance().GetServiceStockRuntimeInfo().GetStockRuntimeInfoByCode(code);
             if(stockRuntimeInfo == null)
             {
+                StockContext.GetInstance().GetServiceStockRuntimeInfo().AddQueryCode(code);
                 return;
             }
 
