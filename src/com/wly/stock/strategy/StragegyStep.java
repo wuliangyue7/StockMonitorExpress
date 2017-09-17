@@ -3,11 +3,15 @@ package com.wly.stock.strategy;
 import com.wly.common.LogUtils;
 import com.wly.common.Utils;
 import com.wly.database.DBPool;
+import com.wly.database.DBQuery;
 import com.wly.stock.StockContext;
 import com.wly.stock.common.*;
 import com.wly.stock.tradeplat.eastmoney.EastmoneyUtils;
 import com.wly.user.RmbAsset;
 import com.wly.user.UserInfo;
+
+import java.sql.ResultSet;
+import java.util.ArrayList;
 
 /**
  * Created by wuly on 2017/8/26.
@@ -236,6 +240,48 @@ public class StragegyStep
     {
         orderIdSell = orderId;
         UpdateOrderIdSell(id, orderIdSell);
+    }
+
+    static public ArrayList<StragegyStep> GetStagegyStepList(UserInfo userInfo)
+    {
+        ArrayList<StragegyStep> stragegyStepArrayList = new ArrayList<>();
+        DBPool dbPool = DBPool.GetInstance();
+        DBQuery dbQuery = dbPool.ExecuteQuerySync(String.format("select * from policy_step where user_id=%d", userInfo.GetUserId()));
+        ResultSet rs = dbQuery.resultSet;
+        StragegyStep stragegyStep;
+        try {
+            while (rs.next())
+            {
+                stragegyStep = new StragegyStep(userInfo);
+                stragegyStep.id = rs.getInt("id");
+                stragegyStep.userId = rs.getInt("user_id");
+                stragegyStep.platId = rs.getInt("plat_id");
+                stragegyStep.code = rs.getString("code");
+                stragegyStep.priceInit = rs.getFloat("price_init");
+                stragegyStep.countInit = rs.getInt("count_init");
+                stragegyStep.priceStepUint = rs.getFloat("price_unit");
+                stragegyStep.countStepUnit = rs.getInt("step_unit");
+                stragegyStep.buyOffset = rs.getFloat("buy_offset");
+                stragegyStep.sellOffset = rs.getFloat("sell_offset");
+                stragegyStep.priceMin = rs.getFloat("min_price");
+                stragegyStep.priceMax = rs.getFloat("max_price");
+                stragegyStep.stragegyStat = rs.getInt("policy_stat");
+                stragegyStep.priceLast = rs.getFloat("price_last");
+                stragegyStep.orderIdBuy = rs.getInt("buyorder_id");
+                stragegyStep.orderIdSell = rs.getInt("sellorder_id");
+                stragegyStepArrayList.add(stragegyStep);
+                StockContext.GetInstance().GetServiceStockRuntimeInfo().AddQueryCode(stragegyStep.code);
+            }
+        }
+        catch (Exception ex)
+        {
+            LogUtils.GetLogger(LogUtils.LOG_REALTIME).error(ex.getMessage());
+        }
+        finally
+        {
+            dbQuery.Close();
+            return stragegyStepArrayList;
+        }
     }
 
     static public void UpdateStragegyStat(int id, int stat)

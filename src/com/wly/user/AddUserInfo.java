@@ -2,6 +2,8 @@ package com.wly.user;
 
 import com.wly.common.LogUtils;
 import com.wly.database.DBPool;
+import com.wly.stock.common.StockConst;
+import com.wly.stock.strategy.StragegyOrder;
 //import com.wly.stock.strategy.StrategyStepAll;
 
 /**
@@ -15,9 +17,9 @@ public class AddUserInfo
         {
             LogUtils.Init("config/log4j.properties");
             DBPool dbPool = DBPool.GetInstance();
-            dbPool.Init("jdbc:mysql://127.0.0.1/stockmonitor?useSSL=true", "root", "123456");
-            InsertPolicy();
+            dbPool.Init("jdbc:mysql://127.0.0.1/stockmonitorexpress?useSSL=true", "root", "123456");
             //InsertUser();
+            InsertStragegyOrder();
             System.out.println("insert finish!");
         }
         catch (Exception ex)
@@ -26,40 +28,6 @@ public class AddUserInfo
         }
     }
 
-    static private  void InsertPolicy()
-    {
-        try
-        {
-//            StrategyStepAll policy;
-//            policy = new StrategyStepAll(null);
-//            policy.userId = 2;
-//            policy.code = "603330";
-//            policy.priceInit = 61.78f;
-//            policy.initCount = 400;
-//            policy.stepUnit = 200;
-//            policy.priceUnit = 2f;
-//            policy.minPrice = 56f;
-//            policy.maxPrice =  76f;
-//            policy.buyOffset = -0.09f;
-//            policy.sellOffset = -0.01f;
-//            policy.policyStat = StrategyStepAll.PolicyStat_Init;
-//            policy.buyOrderId = "0";
-//            policy.sellOrderId = "0";
-//
-//            final String SqlFormat = "insert into policy_step (user_id, code, price_init, count_init," +
-//                    "price_unit, step_unit, buy_offset, sell_offset, min_price, max_price,  policy_stat," +
-//                    "price_last, buyorder_id, buyorder_date, sellorder_id, sellorder_date)" +
-//                    "values(%d, '%s', %.2f, %d, %.2f, %d, %.2f, %.2f, %.2f, %.2f, %d, %.2f, '%s', '%s', '%s', '%s')";
-//            DBPool.GetInstance().ExecuteNoQuerySqlAsync (String.format(SqlFormat, policy.userId, policy.code, policy.priceInit, policy.initCount,
-//                    policy.priceUnit, policy.stepUnit, policy.buyOffset, policy.sellOffset, policy.minPrice, policy.maxPrice, policy.policyStat,
-//                    policy.priceLast, policy.buyOrderId, "0", policy.sellOrderId, "0"));
-
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
-    }
 
     static private void InsertUser()
     {
@@ -71,5 +39,39 @@ public class AddUserInfo
         final String SqlFormat = "insert into userinfo(plat_id, stat, plat_acct, plat_psw) " +
                 "values(%d, %d,'%s', '%s')";
 //        DBPool.GetInstance().ExecuteNoQuerySqlAsync (String.format(SqlFormat, userInfo.platId, 0, userInfo.platAcct, userInfo.platPsw));
+    }
+
+    static private void InsertStragegyOrder()
+    {
+        StragegyOrder stragegyOrder = new StragegyOrder(null);
+        stragegyOrder.userId = 1;
+        stragegyOrder.platId = StockConst.PlatEastmoney;
+        stragegyOrder.stagegyOrderStat = StragegyOrder.OrderStatNormal;
+
+//        //华东医药
+//        stragegyOrder.tradeFlag = StockConst.TradeBuy;
+//        stragegyOrder.code = "000963";
+//        stragegyOrder.priceTrade = 43.01f;
+//        stragegyOrder.countTrade = 1400;
+
+        //荣盛发展 买
+//        stragegyOrder.tradeFlag = StockConst.TradeBuy;
+//        stragegyOrder.code = "002146";
+//        stragegyOrder.priceTrade = 10.34f;
+//        stragegyOrder.countTrade = 1200;
+
+        //荣盛发展 卖
+//        stragegyOrder.tradeFlag = StockConst.TradeSell;
+//        stragegyOrder.code = "002146";
+//        stragegyOrder.priceTrade = 11.14f;
+//        stragegyOrder.countTrade = 1100;
+
+        //众生药业 买
+//        stragegyOrder.tradeFlag = StockConst.TradeBuy;
+//        stragegyOrder.code = "002317";
+//        stragegyOrder.priceTrade = 11.87f;
+//        stragegyOrder.countTrade = 2300;
+
+        StragegyOrder.SaveStragegyOrderDB(stragegyOrder);
     }
 }
