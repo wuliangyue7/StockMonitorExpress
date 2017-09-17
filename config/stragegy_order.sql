@@ -38,4 +38,3 @@ CREATE TABLE `stragegy_order` (
 INSERT INTO `stragegy_order` VALUES ('3', '1', '1', '000963', '1', '0', '43.01', '1400', '0');
 INSERT INTO `stragegy_order` VALUES ('4', '1', '1', '002146', '1', '0', '10.31', '1200', '0');
 INSERT INTO `stragegy_order` VALUES ('5', '1', '1', '002146', '1', '1', '11.14', '1100', '4');
-INSERT INTO `stragegy_order` VALUES ('6', '1', '1', '002317', '1', '0', '11.87', '2300', '0');
