@@ -61,8 +61,8 @@ public class StragegyOrder extends StragegyBase
             return;
         }
 
-        LogUtils.LogRealtime(String.format("StragegyOrder id:%d code:%s name:%s tradeFlag:%d priceTarget:%.2f priceNow:%.2f", id,
-                code, stockRuntimeInfo.name, tradeFlag, priceTrade, stockRuntimeInfo.priceNew));
+        LogUtils.LogRealtime(String.format("StragegyOrder id:%d code:%s name:%s priceNow:%.2f tradeFlag:%d priceTarget:%.2f count:%d", id,
+                code, stockRuntimeInfo.name, stockRuntimeInfo.priceNew, tradeFlag, priceTrade, countTrade));
         if (tradeFlag == StockConst.TradeSell)
         {
             if(GetStockAssetCountEffective(code) < countTrade)
