@@ -314,10 +314,10 @@ public class StragegyStep
 
     static public void SaveToDB(StragegyStep stragegyStep)
     {
-        final String SqlFormat = "insert into policy_step (id, user_id, code, policy_stat, price_last, " +
+        final String SqlFormat = "insert into policy_step (id, user_id, plat_id, code, policy_stat, price_last, " +
                 "price_init, count_init, price_unit, step_unit, buy_offset, sell_offset, min_price, max_price)" +
                 "values(%d, %d, '%s', %d, %.2f,  %.2f, %d, %.2f, %d, %.2f, %.2f, %.2f, %.2f)";
-        String sqlStr = String.format(SqlFormat, stragegyStep.id, stragegyStep.userId, stragegyStep.code, stragegyStep.stragegyStat,
+        String sqlStr = String.format(SqlFormat, stragegyStep.id, stragegyStep.userId, stragegyStep.platId, stragegyStep.code, stragegyStep.stragegyStat,
                 stragegyStep.priceLast, stragegyStep.priceInit, stragegyStep.countInit, stragegyStep.priceStepUint,
                 stragegyStep.countStepUnit, stragegyStep.buyOffset, stragegyStep.sellOffset, stragegyStep.priceMin,
                 stragegyStep.priceMax);
