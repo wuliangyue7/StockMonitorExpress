@@ -14,6 +14,6 @@ public class TradeMain
         LogUtils.Init("config/log4j.properties");
         TradeEastmoneyImpl tradeEastmoney = new TradeEastmoneyImpl();
         String psw = Utils.GetInput("please input password:");
-        tradeEastmoney.Login("540600166072", psw);
+        tradeEastmoney.Login("540600166027", psw);
     }
 }
