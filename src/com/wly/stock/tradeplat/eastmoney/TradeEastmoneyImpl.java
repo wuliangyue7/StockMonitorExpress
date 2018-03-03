@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wly.common.LogUtils;
 import com.wly.common.Utils;
+import com.wly.network.http.CookieItem;
 import com.wly.stock.common.StockConst;
 import com.wly.stock.common.StockUtils;
 import com.wly.stock.common.*;
@@ -122,9 +123,10 @@ public class TradeEastmoneyImpl implements ITradeInterface
             JsonArray jsonArray = new JsonArray();
             for(Cookie cookieTmp1:cookieList)
             {
-                jsonArray.add(Utils.ParserCookie2Json(cookieTmp1));
+                jsonArray.add(CookieItem.ParserCookie2Json(cookieTmp1));
             }
 
+            jsonObject1.addProperty("acct", acct);
             jsonObject1.addProperty("platId", StockConst.PlatEastmoney);
             jsonObject1.add("cookies", jsonArray);
             jsonObject1.addProperty("validatekey", validatekey);

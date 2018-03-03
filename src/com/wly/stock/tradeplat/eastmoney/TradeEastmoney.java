@@ -183,7 +183,7 @@ public class TradeEastmoney implements IHttpRequestHandle, ITradePlatform,ITicka
         CookieStore cookieStore = localContext.getCookieStore();
         for(i=0; i<jsonArray.size(); ++i)
         {
-            cookie = Utils.ParserJson2Cookie(jsonArray.get(i).getAsJsonObject());
+            cookie = CookieItem.ParserJson2Cookie(jsonArray.get(i).getAsJsonObject());
             if(cookie != null)
             {
                 LogUtils.LogRealtime("Add Cookie: "+cookie.getName()+" "+cookie.getValue());

@@ -189,46 +189,4 @@ public class Utils
     {
         return String.format("{\"code\":%d,\"msg\":\"%s\"}", code, msg);
     }
-
-    static public JsonObject ParserCookie2Json(Cookie cookie)
-    {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("name", cookie.getName());
-        jsonObject.addProperty("value", cookie.getValue());
-        jsonObject.addProperty("domain", cookie.getDomain());
-        jsonObject.addProperty("path", cookie.getPath());
-        if(cookie.getExpiryDate() != null)
-        {
-            jsonObject.addProperty("expiryDate", cookie.getExpiryDate().toString());
-        }
-
-        return jsonObject;
-    }
-
-    static public Cookie ParserJson2Cookie(JsonObject jsonObject)
-    {
-        BasicClientCookie cookie = null;
-//        if(!jsonObject.has("name") || jsonObject.has("value"))
-//        {
-//            return cookie;
-//        }
-
-        cookie = new BasicClientCookie(jsonObject.get("name").getAsString(), jsonObject.get("value").getAsString());
-        if(jsonObject.has("domain"))
-        {
-            cookie.setDomain(jsonObject.get("domain").getAsString());
-        }
-
-        if(jsonObject.has("path"))
-        {
-            cookie.setPath(jsonObject.get("path").getAsString());
-        }
-
-        if(jsonObject.has("expiryDate"))
-        {
-            cookie.setExpiryDate(new Date(jsonObject.get("expiryDate").getAsString()));
-        }
-
-        return cookie;
-    }
 }
