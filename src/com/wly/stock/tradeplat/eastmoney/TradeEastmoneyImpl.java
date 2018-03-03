@@ -3,6 +3,7 @@ package com.wly.stock.tradeplat.eastmoney;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.wly.common.LogUtils;
 import com.wly.common.Utils;
 import com.wly.stock.common.StockConst;
 import com.wly.stock.common.StockUtils;
@@ -86,12 +87,12 @@ public class TradeEastmoneyImpl implements ITradeInterface
             CloseableHttpResponse response = httpclient.execute(httpPost, localContext);
             String retStr = Utils.GetResponseContent(response);
             //{"Message":null,"Status":0,"Data":[{"khmc":"张三","Date":"20170209","Time":"142154","Syspm1":"1234545656","Syspm2":"1234","Syspm3":"","Syspm_ex":""}]}
-            System.out.println(retStr);
+//            System.out.println(retStr);
             JsonObject jsonObject = new JsonParser().parse(retStr).getAsJsonObject();
             int stat = jsonObject.get("Status").getAsInt();
             if(stat != 0)
             {
-                System.out.println("login failed! "+jsonObject.get("Message").getAsString());
+                LogUtils.Log("login failed! "+jsonObject.get("Message").getAsString());
                 return;
             }
 
@@ -103,7 +104,7 @@ public class TradeEastmoneyImpl implements ITradeInterface
             localContext.getCookieStore().addCookie(cookie);
             JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
             platUserName = jsonDataArray.get(0).getAsJsonObject().get("khmc").getAsString();
-            System.out.println("userName: "+platUserName);
+//            System.out.println("userName: "+platUserName);
 
             final String PageBuy = "/Trade/Buy";
             HttpGet httpGet = new HttpGet(RootUrl + PageBuy);
@@ -113,7 +114,7 @@ public class TradeEastmoneyImpl implements ITradeInterface
             final  String FindString = "input id=\"em_validatekey\" type=\"hidden\" value=\"";
             int startIdex = pageContent.indexOf(FindString)+FindString.length();
             validatekey = pageContent.substring(startIdex, startIdex+36);
-            System.out.println("validatekey: "+validatekey);
+//            System.out.println("validatekey: "+validatekey);
 
 
             List<Cookie> cookieList = localContext.getCookieStore().getCookies();
@@ -124,18 +125,22 @@ public class TradeEastmoneyImpl implements ITradeInterface
                 jsonArray.add(Utils.ParserCookie2Json(cookieTmp1));
             }
 
-            jsonObject1.addProperty("userId", 1);
             jsonObject1.addProperty("platId", StockConst.PlatEastmoney);
             jsonObject1.add("cookies", jsonArray);
             jsonObject1.addProperty("validatekey", validatekey);
 
-            HttpPost httpPostTestLoginToken = new HttpPost("http://127.0.0.1:8080/tokenInfoEastmoney");
-            httpPostTestLoginToken.setEntity(new StringEntity(jsonObject1.toString(), "utf-8"));
-            CloseableHttpClient httpclientTest = HttpClients.createDefault();
-            CloseableHttpResponse responseTest = httpclientTest.execute(httpPostTestLoginToken);
-            String retStrTest = Utils.GetResponseContent(responseTest);
-            System.out.println("retStrTest:");
-            System.out.println(retStrTest);
+            Utils.WriteFile(String.format("loginInfo/%s.txt", acct), jsonObject1.toString().getBytes());
+            LogUtils.Log(String.format("eastmoney login succ %s", acct));
+            return;
+
+//            HttpPost httpPostTestLoginToken = new HttpPost("http://127.0.0.1:8080/tokenInfoEastmoney");
+//            httpPostTestLoginToken.setEntity(new StringEntity(jsonObject1.toString(), "utf-8"));
+//            CloseableHttpClient httpclientTest = HttpClients.createDefault();
+//            CloseableHttpResponse responseTest = httpclientTest.execute(httpPostTestLoginToken);
+//            String retStrTest = Utils.GetResponseContent(responseTest);
+//            System.out.println("retStrTest:");
+//            System.out.println(retStrTest);
+
             //userInfo.DoTrade("603960", StockConst.TradeSell, 55.7f, 500);
 //            StockUtils.DoTradeSell(0, "603960", 55.7f, 500);
             //for test
