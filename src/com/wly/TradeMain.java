@@ -40,27 +40,27 @@ public class TradeMain
             code = Utils.GetInput("please input stock code:");
         }
 
-        String strPrice = "";
+        String strCount = null;
         if(args.length >= 3)
         {
-            strPrice = args[2];
-        }
-        else
-        {
-            strPrice = Utils.GetInput("please input trade price 0 for runtimePrice:");
-        }
-        float price = Float.parseFloat(strPrice);
-
-        String strCount = null;
-        if(args.length >= 4)
-        {
-            strCount = args[3];
+            strCount = args[2];
         }
         else
         {
             strCount = Utils.GetInput("please input trade count:");
         }
         int count = Integer.parseInt(strCount);
+
+        String strPrice = "";
+        if(args.length >= 4)
+        {
+            strPrice = args[3];
+        }
+        else
+        {
+            strPrice = Utils.GetInput("please input trade price 0 for runtimePrice:");
+        }
+        float price = Float.parseFloat(strPrice);
 
         String strTradeFlag = null;
         if(args.length >= 5)
