@@ -17,7 +17,7 @@ public class StockRuntimeInfo
 
     private int marketInfoStat = MarketInfoStat_None;
 
-    static public  class TradeInfo
+    static public  class PriceInfo
     {
         public float price;
         public long amount;
@@ -34,8 +34,8 @@ public class StockRuntimeInfo
     public float priceSell;
     public long tradeCount;
     public float tradeMoney;
-    public ArrayList<TradeInfo> buyInfo = new ArrayList<TradeInfo>(5);
-    public ArrayList<TradeInfo> sellInfo = new ArrayList<TradeInfo>(5);
+    public ArrayList<PriceInfo> buyInfo = new ArrayList<PriceInfo>(5);
+    public ArrayList<PriceInfo> sellInfo = new ArrayList<PriceInfo>(5);
 
     public float GetChange()
     {
@@ -75,17 +75,17 @@ public class StockRuntimeInfo
         }
 
         int i;
-        TradeInfo tradeInfo;
+        PriceInfo priceInfo;
         boolean ret = false;
         if(tradeFlag == StockConst.TradeSell)
         {
             int num = 0;
             for(i=0; i<buyInfo.size(); ++i)
             {
-                tradeInfo = buyInfo.get(i);
-                if(tradeInfo.price >= price)
+                priceInfo = buyInfo.get(i);
+                if(priceInfo.price >= price)
                 {
-                    num += tradeInfo.amount;
+                    num += priceInfo.amount;
                 }
             }
 
@@ -96,10 +96,10 @@ public class StockRuntimeInfo
             int num = 0;
             for(i=0; i<sellInfo.size(); ++i)
             {
-                tradeInfo = sellInfo.get(i);
-                if(tradeInfo.price <= price)
+                priceInfo = sellInfo.get(i);
+                if(priceInfo.price <= price)
                 {
-                    num += tradeInfo.amount;
+                    num += priceInfo.amount;
                 }
             }
 
@@ -111,9 +111,9 @@ public class StockRuntimeInfo
 
     public void CacuStat()
     {
-        TradeInfo maxBuyInfo = buyInfo.get(0);
+        PriceInfo maxBuyInfo = buyInfo.get(0);
         float buyPrice = maxBuyInfo.price;
-        TradeInfo minSellInfo = sellInfo.get(0);
+        PriceInfo minSellInfo = sellInfo.get(0);
         float sellPrice = minSellInfo.price;
         if((buyPrice< 0.01f && sellPrice < 0.01f)
         ||(buyPrice == sellPrice))

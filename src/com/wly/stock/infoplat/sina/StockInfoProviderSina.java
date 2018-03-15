@@ -45,7 +45,19 @@ public class StockInfoProviderSina implements IStockInfoProvider
     }
 
     @Override
-    public ArrayList<StockRuntimeInfo> GetStockInfoByCode(ArrayList<String> codeList) throws Exception
+    public ArrayList<StockRuntimeInfo> GetStockInfoByCode(ArrayList<String> codeList) throws Exception{
+        return GetStockRuntimeInfoByCodes(codeList);
+    }
+
+    static public StockRuntimeInfo GetStockRuntimeInfoByCode(String code) throws Exception
+    {
+        ArrayList<String> stringArrayList = new ArrayList<>();
+        stringArrayList.add(code);
+        ArrayList<StockRuntimeInfo> runtimeInfos = GetStockRuntimeInfoByCodes(stringArrayList);
+        return runtimeInfos.get(0);
+    }
+
+    static public ArrayList<StockRuntimeInfo> GetStockRuntimeInfoByCodes(ArrayList<String> codeList) throws Exception
     {
         if(codeList == null || codeList.size()==0)
         {
@@ -137,23 +149,23 @@ public class StockInfoProviderSina implements IStockInfoProvider
         info.tradeMoney = Float.parseFloat(infoList[eInfoIdx.TradeTotalMoney.ordinal()]);
 
         int i;
-        StockRuntimeInfo.TradeInfo tradeInfo;
+        StockRuntimeInfo.PriceInfo priceInfo;
         int startIdx = eInfoIdx.TradeInfoStart.ordinal();
         for(i=0; i<TradeInfoCount; ++i)
         {
-            tradeInfo = new StockRuntimeInfo.TradeInfo();
-            tradeInfo.amount = Long.parseLong(infoList[startIdx+2*i]);
-            tradeInfo.price = Float.parseFloat(infoList[startIdx+2*i+1]);
-            info.buyInfo.add(tradeInfo);
+            priceInfo = new StockRuntimeInfo.PriceInfo();
+            priceInfo.amount = Long.parseLong(infoList[startIdx+2*i]);
+            priceInfo.price = Float.parseFloat(infoList[startIdx+2*i+1]);
+            info.buyInfo.add(priceInfo);
         }
 
         startIdx = eInfoIdx.TradeInfoStart.ordinal()+2*TradeInfoCount;
         for(i=0; i<TradeInfoCount; ++i)
         {
-            tradeInfo = new StockRuntimeInfo.TradeInfo();
-            tradeInfo.amount = Long.parseLong(infoList[startIdx+2*i]);
-            tradeInfo.price = Float.parseFloat(infoList[startIdx+2*i+1]);
-            info.sellInfo.add(tradeInfo);
+            priceInfo = new StockRuntimeInfo.PriceInfo();
+            priceInfo.amount = Long.parseLong(infoList[startIdx+2*i]);
+            priceInfo.price = Float.parseFloat(infoList[startIdx+2*i+1]);
+            info.sellInfo.add(priceInfo);
         }
         //System.out.println(info.toString());
         info.CacuStat();

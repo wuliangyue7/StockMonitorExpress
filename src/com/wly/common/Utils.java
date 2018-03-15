@@ -14,10 +14,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -183,6 +180,34 @@ public class Utils
         {
             ex.printStackTrace();
         }
+    }
+
+    static public String ReadFile(String filePath)
+    {
+        try
+        {
+            File file = new File(filePath);
+            Long filelength = file.length();
+            byte[] filecontent = new byte[filelength.intValue()];
+
+            FileInputStream in = new FileInputStream(file);
+            in.read(filecontent);
+            in.close();
+            return new String(filecontent, "UTF-8");
+        }
+        catch (Exception ex)
+        {
+            System.out.print(ex.getMessage());
+            ex.printStackTrace();
+        }
+//        try {
+//            return new String(filecontent, encoding);
+//        } catch (UnsupportedEncodingException e) {
+//            System.err.println("The OS does not support " + encoding);
+//            e.printStackTrace();
+//            return null;
+//        }
+        return null;
     }
 
     static public String FormatResult(int code, String msg)

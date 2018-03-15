@@ -22,7 +22,7 @@ public class StockUtils
 
         int i;
         int tradeCount = 0;
-        StockRuntimeInfo.TradeInfo tradeInfo;
+        StockRuntimeInfo.PriceInfo priceInfo;
         boolean allCanTrade =  true;
         if(tradeFlag == StockConst.TradeBuy)
         {
@@ -30,10 +30,10 @@ public class StockUtils
             {
                 for(i=0; i<stockRuntimeInfo.sellInfo.size(); ++i)
                 {
-                    tradeInfo = stockRuntimeInfo.sellInfo.get(i);
-                    if(price >= tradeInfo.price)
+                    priceInfo = stockRuntimeInfo.sellInfo.get(i);
+                    if(price >= priceInfo.price)
                     {
-                        tradeCount += tradeInfo.amount;
+                        tradeCount += priceInfo.amount;
                     }
                     else
                     {
@@ -53,10 +53,10 @@ public class StockUtils
             {
                 for(i=0; i<stockRuntimeInfo.buyInfo.size(); ++i)
                 {
-                    tradeInfo = stockRuntimeInfo.buyInfo.get(i);
-                    if(price <= tradeInfo.price)
+                    priceInfo = stockRuntimeInfo.buyInfo.get(i);
+                    if(price <= priceInfo.price)
                     {
-                        tradeCount += tradeInfo.amount;
+                        tradeCount += priceInfo.amount;
                     }
                     else
                     {
@@ -205,5 +205,17 @@ public class StockUtils
     static public float GetStampTax(float amount)
     {
         return TrimValueRound(StampTaxRate * amount);
+    }
+
+    static public float GetMaxPrice(float lastPrice)
+    {
+        float tmp = Math.round(lastPrice*110);
+        return tmp/100;
+    }
+
+    static public float GetMinPrice(float lastPrice)
+    {
+        float tmp = Math.round(lastPrice*90);
+        return tmp/100;
     }
 }
