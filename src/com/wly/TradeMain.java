@@ -51,21 +51,10 @@ public class TradeMain
         }
         int count = Integer.parseInt(strCount);
 
-        String strPrice = "";
+        String strTradeFlag = null;
         if(args.length >= 4)
         {
-            strPrice = args[3];
-        }
-        else
-        {
-            strPrice = Utils.GetInput("please input trade price 0 for runtimePrice:");
-        }
-        float price = Float.parseFloat(strPrice);
-
-        String strTradeFlag = null;
-        if(args.length >= 5)
-        {
-            strTradeFlag = args[4];
+            strTradeFlag = args[3];
         }
         else
         {
@@ -77,6 +66,17 @@ public class TradeMain
             LogUtils.LogRealtime(String.format("invalid trade flag %d", tradeFlag));
             return;
         }
+
+        String strPrice = "";
+        if(args.length >= 5)
+        {
+            strPrice = args[4];
+        }
+        else
+        {
+            strPrice = Utils.GetInput("please input trade price 0 for runtimePrice:");
+        }
+        float price = Float.parseFloat(strPrice);
 
         StockRuntimeInfo stockRuntimeInfo = StockInfoProviderSina.GetStockRuntimeInfoByCode(code);
         if (stockRuntimeInfo == null)
@@ -118,8 +118,6 @@ public class TradeMain
         tradeInfo.tradeFlag = tradeFlag;
         tradeInfo.orderPrice = price;
 
-
-
         String checkInfo = String.format("please confirm trade info (Y/N) trade info:\n %s %s %.2f %d %s", tradeInfo.code, tradeInfo.name, tradeInfo.orderPrice,
                 tradeInfo.orderCount, tradeInfo.tradeFlag==StockConst.TradeSell?"Sell":"Buy");
         String confirm = Utils.GetInput(checkInfo);
@@ -130,7 +128,6 @@ public class TradeMain
         }
 
         String loginInfo = Utils.ReadFile(String.format("loginInfo/%s.txt", acct));
-        LogUtils.LogRealtime(loginInfo);
         JsonObject jsonObject = new JsonParser().parse(loginInfo).getAsJsonObject();
         CookieStore  cookieStore = new BasicCookieStore();
         CookieItem.FillCookieStore(cookieStore, jsonObject.getAsJsonArray("cookies"));

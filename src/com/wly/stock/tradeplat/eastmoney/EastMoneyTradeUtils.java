@@ -1,7 +1,9 @@
 package com.wly.stock.tradeplat.eastmoney;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.wly.common.LogUtils;
 import com.wly.common.Utils;
 import com.wly.stock.common.OrderInfo;
 import com.wly.stock.common.StockConst;
@@ -59,6 +61,71 @@ public class EastMoneyTradeUtils
                 System.out.println("DoOrder Succ! ");
             }
 
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+
+    static public void QueryTradeInfo(CookieStore cookieStore, String validatekey)
+    {
+        try
+        {
+            final String QueryUrl = "/Search/GetOrdersData?validatekey=";
+            HttpPost httpPost = new HttpPost(RootUrl + QueryUrl + validatekey);
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("qqhs", "20"));
+            params.add(new BasicNameValuePair("wc", ""));
+            httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+
+            CloseableHttpClient httpclient = HttpClients.createDefault();
+            HttpClientContext localContext = new HttpClientContext();
+            localContext.setCookieStore(cookieStore);
+            CloseableHttpResponse response = httpclient.execute(httpPost, localContext);
+
+            String retStr = Utils.GetResponseContent(response);
+             System.out.println(retStr);
+
+            JsonObject jsonObject = new JsonParser().parse(retStr).getAsJsonObject();
+            int stat = jsonObject.get("Status").getAsInt();
+            if (stat != 0)
+            {
+                System.out.println("QueryTradeInfo failed! " + jsonObject.get("Message").getAsString());
+                return;
+            }
+
+            JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
+            int i;
+            JsonObject newOrderInfo;
+            String tradeId;
+            String code;
+            String name;
+            String tradeDesc;
+            String totalCount;
+            String priceOrder;
+            String tradeStat;
+            String dealCount;
+            String priceDeal;
+
+            String strTmp;
+            for (i = 0; i < jsonDataArray.size(); ++i)
+            {
+                newOrderInfo = jsonDataArray.get(i).getAsJsonObject();
+                tradeId = newOrderInfo.get("Wtbh").getAsString();
+                code = newOrderInfo.get("Zqdm").getAsString();
+                name = newOrderInfo.get("Zqmc").getAsString();
+                tradeDesc = newOrderInfo.get("Mmsm").getAsString();
+                totalCount = newOrderInfo.get("Wtsl").getAsString();
+                priceOrder = newOrderInfo.get("Wtjg").getAsString();
+                tradeStat = newOrderInfo.get("Wtzt").getAsString();
+                dealCount = newOrderInfo.get("Cjsl").getAsString();
+                priceDeal = newOrderInfo.get("Cjje").getAsString();
+
+                strTmp = String.format("%s %s %s %s %s %s %s %s %s %s", tradeId, code, name, tradeDesc, totalCount,
+                        priceOrder, tradeStat, dealCount, priceDeal);
+                LogUtils.LogRealtime(strTmp);
+            }
         }
         catch (Exception ex)
         {
