@@ -68,6 +68,42 @@ public class EastMoneyTradeUtils
         }
     }
 
+    static public void QueryMoneyInfo(CookieStore cookieStore, String validatekey)
+    {
+        try
+        {
+            final String GetRmbAssetPage = "/Com/GetAssets?validatekey=";
+            HttpPost httpPost = new HttpPost(RootUrl + GetRmbAssetPage+validatekey);
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("moneyType", "RMB"));
+            httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+
+            CloseableHttpClient httpclient = HttpClients.createDefault();
+            HttpClientContext localContext = new HttpClientContext();
+            localContext.setCookieStore(cookieStore);
+            CloseableHttpResponse response = httpclient.execute(httpPost, localContext);
+
+            String retStr = Utils.GetResponseContent(response);
+            //{"Message":null,"Status":0,"Data":[{"RMBZzc":"1.73","Zzc":"1.73","Zxsz":"0.73","Kyzj":"1.73","Kqzj":"1.00","Djzj":"0.00","Zjye":"1.00","Money_type":"RMB","Drckyk":null,"Ljyk":null}]}
+            System.out.println(retStr);
+            JsonObject jsonObject = new JsonParser().parse(retStr).getAsJsonObject();
+            int stat = jsonObject.get("Status").getAsInt();
+            if(stat != 0)
+            {
+                System.out.println("get asset failed! "+jsonObject.get("Message").getAsString());
+                return;
+            }
+            JsonArray jsonDataArray = jsonObject.get("Data").getAsJsonArray();
+            LogUtils.LogRealtime(String.format("money: %.2f", jsonDataArray.get(0).getAsJsonObject().get("Kyzj").getAsFloat()));
+            //            return  jsonDataArray.get(0).getAsJsonObject().get("Kyzj").getAsFloat();
+
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+
     static public void QueryTradeInfo(CookieStore cookieStore, String validatekey)
     {
         try
