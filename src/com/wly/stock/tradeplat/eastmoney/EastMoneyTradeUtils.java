@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.wly.common.LogUtils;
 import com.wly.common.Utils;
+import com.wly.network.http.CookieItem;
 import com.wly.stock.common.OrderInfo;
 import com.wly.stock.common.StockConst;
 import com.wly.stock.common.TradeInfo;
@@ -30,6 +31,23 @@ public class EastMoneyTradeUtils
 {
     static public final String RootUrl = "https://jy.xzsec.com";
     static public final String OrderUrl = "/Trade/SubmitTrade?validatekey=";
+    static public void DoTrade(String acct, String code, String name, int tradeFlag, int count, float price)
+    {
+        String loginInfo = Utils.ReadFile(String.format("loginInfo/%s.txt", acct));
+        JsonObject jsonObject = new JsonParser().parse(loginInfo).getAsJsonObject();
+        CookieStore  cookieStore = new BasicCookieStore();
+        CookieItem.FillCookieStore(cookieStore, jsonObject.getAsJsonArray("cookies"));
+        String validatekey = jsonObject.get("validatekey").getAsString();
+
+        TradeInfo  tradeInfo = new TradeInfo();
+        tradeInfo.code = code;
+        tradeInfo.name = name;
+        tradeInfo.orderCount = count;
+        tradeInfo.tradeFlag = tradeFlag;
+        tradeInfo.orderPrice = price;
+        DoTrade(cookieStore, validatekey, tradeInfo);
+    }
+
     static public void DoTrade(CookieStore cookieStore, String validatekey, TradeInfo trandeInfo)
     {
         HttpPost httpPost = new HttpPost(RootUrl + OrderUrl+validatekey);
