@@ -176,7 +176,7 @@ public class EastMoneyTradeUtils
                 dealCount = newOrderInfo.get("Cjsl").getAsString();
                 priceDeal = newOrderInfo.get("Cjje").getAsString();
 
-                strTmp = String.format("%s %s %s %s %s %s %s %s %s %s", tradeId, code, name, tradeDesc, totalCount,
+                strTmp = String.format("%s %s %s %s %s %s %s %s %s", tradeId, code, name, tradeDesc, totalCount,
                         priceOrder, tradeStat, dealCount, priceDeal);
                 LogUtils.LogRealtime(strTmp);
             }

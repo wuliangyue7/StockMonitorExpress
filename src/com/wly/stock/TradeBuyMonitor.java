@@ -89,7 +89,7 @@ class StockBuyPriceMonitor extends TimerTask
             StockRuntimeInfo.PriceInfo priceInfo = stockRuntimeInfo.buyInfo.get(0);
             String buyDesc = String.format("Code:%s Name:%s Price: %.2f change;%.2f ratio:%.2f%% buyCount:%d targetPrice:%.2f",
                     stockRuntimeInfo.code, stockRuntimeInfo.name, stockRuntimeInfo.priceNew, stockRuntimeInfo.GetChange(),
-                    stockRuntimeInfo.GetRatio(), priceInfo.amount/100, buyPriceMonitorInfo.price);
+                    stockRuntimeInfo.GetRatio(), buyPriceMonitorInfo.countTrade, buyPriceMonitorInfo.price);
             System.out.println(buyDesc);
 
             if(stockRuntimeInfo.TestDeal(buyPriceMonitorInfo.tradeFlag, buyPriceMonitorInfo.price,
