@@ -81,8 +81,13 @@ public class StockUtils
 
     static public eStockPlate GetPlateByCode(String codeStr)
     {
+        int code  = 0;
         eStockPlate plate = eStockPlate.None;
-        int code = Integer.parseInt(codeStr);
+        try {
+            code = Integer.parseInt(codeStr);
+        }catch (NumberFormatException e) {
+            return plate;
+        }
 
         int i;
         for (i = 0; i < StockConst.SpecialCodeSH.length; ++i)
@@ -90,6 +95,24 @@ public class StockUtils
             if(StockConst.SpecialCodeSH[i].equals(codeStr))
             {
                 plate = eStockPlate.PlateSH;
+                return  plate;
+            }
+        }
+
+        for (i = 0; i < StockConst.DebtCodeSH.length; ++i)
+        {
+            if(codeStr.startsWith(StockConst.DebtCodeSH[i]))
+            {
+                plate = eStockPlate.PlateSH;
+                return  plate;
+            }
+        }
+
+        for (i = 0; i < StockConst.DebtCodeSZ.length; ++i)
+        {
+            if(codeStr.startsWith(StockConst.DebtCodeSZ[i]))
+            {
+                plate = eStockPlate.PlateSZ;
                 return  plate;
             }
         }

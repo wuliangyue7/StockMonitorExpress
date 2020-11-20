@@ -11,7 +11,9 @@ public class StockConst
     static public final String PrefixSH = "sh";
     static public final String PrefixSZ = "sz";
 
+    static public  final String[]  DebtCodeSH = new String[]{"11"};
     static public  final String[]  SpecialCodeSH = new String[]{"000001"};
+    static public  final String[]  DebtCodeSZ = new String[]{"12"};
     static public  final String[]  SpecialCodeSZ = new String[]{""};
 
     static public  final String RmbCode = "000000";
